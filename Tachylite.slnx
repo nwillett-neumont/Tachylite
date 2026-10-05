@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="Tachylite.Android/Tachylite.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="Tachylite.Browser/Tachylite.Browser.csproj" />
+  <Project Path="Tachylite.Desktop/Tachylite.Desktop.csproj" />
+  <Project Path="Tachylite.iOS/Tachylite.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="Tachylite.Services/Tachylite.Services.csproj" />
+  <Project Path="Tachylite.Tests/Tachylite.Tests.csproj" />
+  <Project Path="Tachylite/Tachylite.csproj" />
+</Solution>
