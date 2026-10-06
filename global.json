@@ -1,5 +1,5 @@
 {
   "test": {
-    "runner": "VSTest"
+    "runner": "Microsoft.Testing.Platform"
   }
 }
