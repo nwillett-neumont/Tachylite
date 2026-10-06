@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tachylite\Tachylite.csproj" />
+    <ProjectReference Include="..\Tachylite.App\Tachylite.App.csproj" />
   </ItemGroup>
 </Project>
