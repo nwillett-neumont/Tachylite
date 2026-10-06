@@ -8,6 +8,6 @@
   <Project Path="Tachylite.iOS/Tachylite.iOS.csproj">
     <Deploy />
   </Project>
-  <Project Path="Tachylite.Tests/Tachylite.Tests.csproj" />
   <Project Path="Tachylite.App/Tachylite.App.csproj" />
+  <Project Path="Tachylite.Tests/Tachylite.Tests.csproj" />
 </Solution>
