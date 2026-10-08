@@ -167,6 +167,9 @@ public class Tests
     {
         // Arrange
         fileSystemService = new FileSystemService();
+        deleteUserConfigurationDirectory(fileSystemService);
+        fileSystemService.InitializeUserConfigurationDirectory();
+        
         string[] expected = [];
 
         //Act
