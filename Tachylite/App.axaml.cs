@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Tachylite.Core.Services;
+using Tachylite.Desktop.Services;
 using Tachylite.ViewModels;
 using Tachylite.Views;
 
@@ -20,10 +22,15 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var collection = new ServiceCollection();
-        // collection.AddCommonServices();
+        collection.AddCommonServices();
 
+        var services = collection.BuildServiceProvider();
+
+        var vm = services.GetRequiredService<MainViewModel>();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            collection.AddSingleton<IFileSystemService, FileSystemService>();
+            
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainViewModel()

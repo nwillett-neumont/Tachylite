@@ -18,5 +18,11 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tachylite.Core\Tachylite.Core.csproj" />
+    <ProjectReference Include="..\Tachylite.Desktop\Tachylite.Desktop.csproj" />
   </ItemGroup>
 </Project>
