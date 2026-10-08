@@ -13,10 +13,11 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tachylite.App\Tachylite.App.csproj" />
+    <ProjectReference Include="..\Tachylite\Tachylite.csproj" />
     <ProjectReference Include="..\Tachylite.Core\Tachylite.Core.csproj" />
   </ItemGroup>
 </Project>
