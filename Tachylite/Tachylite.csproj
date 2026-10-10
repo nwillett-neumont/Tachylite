@@ -23,6 +23,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tachylite.Core\Tachylite.Core.csproj" />
-    <ProjectReference Include="..\Tachylite.Desktop\Tachylite.Desktop.csproj" />
   </ItemGroup>
 </Project>
