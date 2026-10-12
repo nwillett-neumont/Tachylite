@@ -18,4 +18,6 @@ public interface IFileSystemService
     public void AddRecent(string path);
 
     public string[] GetRecents();
+
+    public void PopRecent();
 }
