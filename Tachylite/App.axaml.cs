@@ -1,4 +1,5 @@
 using System;
+using Aspose.Pdf.Operators;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -31,10 +32,35 @@ public partial class App : Application
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
+
+            string[] recents = fileSystemService.GetRecents();
+
+            foreach (string path in recents)
             {
-                DataContext = new MainViewModel()
-            };
+                if (fileSystemService.IsValidChest(path))
+                {
+                    desktop.MainWindow = new EditorWindow
+                    {
+                        DataContext = new EditorViewModel(path, fileSystemService, services.GetRequiredService<IValidationService>())
+                    };
+                }
+                else
+                {
+                    fileSystemService.PopRecent();
+                }
+            }
+
+            recents = fileSystemService.GetRecents();
+
+            if (recents.Length < 1)
+            {
+                desktop.MainWindow = new HomeWindow
+                {
+                    DataContext = new HomeWindowViewModel(recents, fileSystemService, services.GetRequiredService<IValidationService>())
+                };
+            }
+
         }
         else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
         {
