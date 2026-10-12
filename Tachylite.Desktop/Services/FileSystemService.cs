@@ -120,4 +120,17 @@ public class FileSystemService : IFileSystemService
 
         return recents.Recents;
     }
+
+    public void PopRecent()
+    {
+        string[] recents = GetRecents();
+        string[] newRecents = new string[recents.Length - 1];
+        for (int i = 0; i < recents.Length - 1; i++)
+        {
+            newRecents[i] = recents[i + 1];
+        }
+        RecentFileList newRecentsModel = new RecentFileList() { Recents = newRecents };
+        string newRecentsContent = JsonSerializer.Serialize(newRecentsModel);
+        File.WriteAllText(Path.Combine(GetConfigurationDirectoryPath(), "recents.json"), newRecentsContent);
+    }
 }
