@@ -133,4 +133,44 @@ public class FileSystemService : IFileSystemService
         string newRecentsContent = JsonSerializer.Serialize(newRecentsModel);
         File.WriteAllText(Path.Combine(GetConfigurationDirectoryPath(), "recents.json"), newRecentsContent);
     }
+
+    public void CreateChestSubfolder(string chestPath, string? subfolder, string name)
+    {
+        if (!IsValidChest(chestPath)) return;
+
+        string createPath = chestPath;
+        if (!string.IsNullOrWhiteSpace(subfolder) && Path.Exists(Path.Combine(chestPath, subfolder))) createPath = Path.Combine(chestPath, subfolder);
+
+        if (Path.Exists(Path.Combine(createPath, name))) return;
+
+        Directory.CreateDirectory(Path.Combine(createPath, name));
+    }
+
+    public void CreateMarkdownFile(string chestPath, string? subfolder, string name)
+    {
+        if (!IsValidChest(chestPath)) return;
+
+        string createPath = chestPath;
+        if (!string.IsNullOrWhiteSpace(subfolder) && Path.Exists(Path.Combine(chestPath, subfolder))) createPath = Path.Combine(chestPath, subfolder);
+
+        if (!name.Contains(".md")) name += ".md";
+
+        if (Path.Exists(Path.Combine(createPath, name))) return;
+
+        File.Create(Path.Combine(createPath, name));
+    }
+
+    public void ImportPdfFile(string chestPath, string? subfolder, string existingPdfPath)
+    {
+        if (!IsValidChest(chestPath) || !Path.Exists(existingPdfPath)) return;
+        if (GetFileType(existingPdfPath) != FileType.PDF) return;
+
+        string destinationPath = chestPath;
+        if (!string.IsNullOrWhiteSpace(subfolder) && Path.Exists(Path.Combine(chestPath, subfolder))) destinationPath = Path.Combine(chestPath, subfolder);
+        destinationPath = Path.Combine(destinationPath, Path.GetFileName(existingPdfPath));
+
+        if (Path.Exists(Path.Combine(destinationPath))) return;
+
+        File.Copy(existingPdfPath, destinationPath);
+    }
 }

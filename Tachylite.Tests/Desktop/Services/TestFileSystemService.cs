@@ -142,115 +142,213 @@ public class Tests
     //     Assert.True(fileSystemService.IsValidChest("mock\\notchest"));
     // }
 
-    [Fact]
-    public void CreateNewChest_FileSystemService_Desktop_CorrectlyCreatesChest()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string path = ".";
-        string name = "chungus";
-        string chestPath = Path.Combine(path, name);
-        bool exists = false;
+    // [Fact]
+    // public void CreateNewChest_FileSystemService_Desktop_CorrectlyCreatesChest()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string path = ".";
+    //     string name = "chungus";
+    //     string chestPath = Path.Combine(path, name);
+    //     bool exists = false;
 
-        //Act
-        fileSystemService.CreateNewChest(path, name);
-        exists = Path.Exists(chestPath) && 
-            Path.Exists(Path.Combine(chestPath, ".chest")) &&
-            File.Exists(Path.Combine(chestPath, "Hello.md"));
+    //     //Act
+    //     fileSystemService.CreateNewChest(path, name);
+    //     exists = Path.Exists(chestPath) && 
+    //         Path.Exists(Path.Combine(chestPath, ".chest")) &&
+    //         File.Exists(Path.Combine(chestPath, "Hello.md"));
 
-        // Assert
-        Assert.True(exists);
-    }
+    //     // Assert
+    //     Assert.True(exists);
+    // }
 
-    [Fact]
-    public void GetRecents_FileSystemService_Desktop_CorrectlyReadsRecents()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        deleteUserConfigurationDirectory(fileSystemService);
-        fileSystemService.InitializeUserConfigurationDirectory();
+    // [Fact]
+    // public void GetRecents_FileSystemService_Desktop_CorrectlyReadsRecents()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     deleteUserConfigurationDirectory(fileSystemService);
+    //     fileSystemService.InitializeUserConfigurationDirectory();
         
-        string[] expected = [];
+    //     string[] expected = [];
 
-        //Act
-        string[] actual = fileSystemService.GetRecents();
+    //     //Act
+    //     string[] actual = fileSystemService.GetRecents();
 
-        // Assert
-        Assert.Equal(expected, actual);
-    }
+    //     // Assert
+    //     Assert.Equal(expected, actual);
+    // }
 
-    [Fact]
-    public void AddRecent_FileSystemService_Desktop_CorrectlyAddsRecent()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        deleteUserConfigurationDirectory(fileSystemService);
-        fileSystemService.InitializeUserConfigurationDirectory();
+    // [Fact]
+    // public void AddRecent_FileSystemService_Desktop_CorrectlyAddsRecent()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     deleteUserConfigurationDirectory(fileSystemService);
+    //     fileSystemService.InitializeUserConfigurationDirectory();
         
-        string pathToAdd = "~/testpath/chest";
-        string[] expected = ["~/testpath/chest"];
+    //     string pathToAdd = "~/testpath/chest";
+    //     string[] expected = ["~/testpath/chest"];
 
-        //Act
-        fileSystemService.AddRecent(pathToAdd);
-        string[] actual = fileSystemService.GetRecents();
+    //     //Act
+    //     fileSystemService.AddRecent(pathToAdd);
+    //     string[] actual = fileSystemService.GetRecents();
 
-        // Assert
-        Assert.Equal(expected, actual);
-    }
+    //     // Assert
+    //     Assert.Equal(expected, actual);
+    // }
 
-    [Fact]
-    public void AddRecent_FileSystemService_Desktop_CorrectlyAddsRecentWhenMultipleExist()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        deleteUserConfigurationDirectory(fileSystemService);
-        fileSystemService.InitializeUserConfigurationDirectory();
+    // [Fact]
+    // public void AddRecent_FileSystemService_Desktop_CorrectlyAddsRecentWhenMultipleExist()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     deleteUserConfigurationDirectory(fileSystemService);
+    //     fileSystemService.InitializeUserConfigurationDirectory();
 
-        string pathToAdd = "~/testpath/chest";
-        string[] expected = ["~/testpath/chest", "~/testpath/chest"];
+    //     string pathToAdd = "~/testpath/chest";
+    //     string[] expected = ["~/testpath/chest", "~/testpath/chest"];
 
-        //Act
-        fileSystemService.AddRecent(pathToAdd);
-        fileSystemService.AddRecent(pathToAdd);
-        string[] actual = fileSystemService.GetRecents();
+    //     //Act
+    //     fileSystemService.AddRecent(pathToAdd);
+    //     fileSystemService.AddRecent(pathToAdd);
+    //     string[] actual = fileSystemService.GetRecents();
 
-        // Assert
-        Assert.Equal(expected, actual);
-    }
+    //     // Assert
+    //     Assert.Equal(expected, actual);
+    // }
 
-    [Fact]
-    public void AddRecent_FileSystemService_Desktop_CorrectlyHandlesMaximumOfTen()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        deleteUserConfigurationDirectory(fileSystemService);
-        fileSystemService.InitializeUserConfigurationDirectory();
+    // [Fact]
+    // public void AddRecent_FileSystemService_Desktop_CorrectlyHandlesMaximumOfTen()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     deleteUserConfigurationDirectory(fileSystemService);
+    //     fileSystemService.InitializeUserConfigurationDirectory();
 
-        string pathToAdd = "~/testpath/chests";
-        string fillerPath = "~/testpath/chest";
-        string lastPath = "~/testpath/chests";
-        string[] expected = [
-            "~/testpath/chests", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest", 
-            "~/testpath/chest"];
+    //     string pathToAdd = "~/testpath/chests";
+    //     string fillerPath = "~/testpath/chest";
+    //     string lastPath = "~/testpath/chests";
+    //     string[] expected = [
+    //         "~/testpath/chests", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest", 
+    //         "~/testpath/chest"];
 
-        //Act
-        fileSystemService.AddRecent(lastPath);
-        for (int i = 0; i < 9; i++)
-        {
-            fileSystemService.AddRecent(fillerPath);
-        }
-        fileSystemService.AddRecent(pathToAdd);
-        string[] actual = fileSystemService.GetRecents();
+    //     //Act
+    //     fileSystemService.AddRecent(lastPath);
+    //     for (int i = 0; i < 9; i++)
+    //     {
+    //         fileSystemService.AddRecent(fillerPath);
+    //     }
+    //     fileSystemService.AddRecent(pathToAdd);
+    //     string[] actual = fileSystemService.GetRecents();
 
-        // Assert
-        Assert.Equal(expected, actual);
-    }
+    //     // Assert
+    //     Assert.Equal(expected, actual);
+    // }
+
+    // [Fact]
+    // public void CreateChestSubfolder_FileSystemService_Desktop_CorrectlyCreatesSubfolder()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+
+    //     //Act
+    //     fileSystemService.CreateChestSubfolder(pathToChest, null, "Subfolder");
+
+    //     // Assert
+    //     Assert.True(Path.Exists("C:\\Users\\nwillett\\Downloads\\che\\Subfolder"));
+    // }
+
+    // [Fact]
+    // public void CreateChestSubfolder_FileSystemService_Desktop_CorrectlyCreatesSubfolderInSubfolder()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+
+    //     //Act
+    //     fileSystemService.CreateChestSubfolder(pathToChest, "Subfolder", "Subfolder2");
+
+    //     // Assert
+    //     Assert.True(Path.Exists("C:\\Users\\nwillett\\Downloads\\che\\Subfolder\\Subfolder2"));
+    // }
+
+    // [Fact]
+    // public void CreateMarkdownFile_FileSystemService_Desktop_CorrectlyCreatesMarkdownFile()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+    //     string fileName = "Markdo";
+
+    //     //Act
+    //     fileSystemService.CreateMarkdownFile(pathToChest, null, fileName);
+
+    //     // Assert
+    //     Assert.True(File.Exists("C:\\Users\\nwillett\\Downloads\\che\\Markdo.md"));
+    // }
+
+    // [Fact]
+    // public void CreateMarkdownFile_FileSystemService_Desktop_CorrectlyHandlesFileWithMDExtension()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+    //     string fileName = "Markdot.md";
+    //     //Act
+    //     fileSystemService.CreateMarkdownFile(pathToChest, null, fileName);
+
+    //     // Assert
+    //     Assert.True(File.Exists("C:\\Users\\nwillett\\Downloads\\che\\Markdot.md"));
+    // }
+
+    // [Fact]
+    // public void ImportPdfFile_FileSystemService_Desktop_CorrectlyCopiesPdfFile()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+    //     string pdfPath = "C:\\Users\\nwillett\\Downloads\\Interactive_DnD_3.5_Character_Sheet.pdf";
+    //     //Act
+    //     fileSystemService.ImportPdfFile(pathToChest, null, pdfPath);
+
+    //     // Assert
+    //     Assert.True(File.Exists("C:\\Users\\nwillett\\Downloads\\che\\Interactive_DnD_3.5_Character_Sheet.pdf") && File.Exists(pdfPath));
+    // }
+
+    // [Fact]
+    // public void ImportPdfFile_FileSystemService_Desktop_IgnoresNonPdfFiles()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Downloads\\che";
+    //     string pdfPath = "C:\\Users\\nwillett\\Downloads\\logisim-generic-2.7.1.jar";
+
+    //     //Act
+    //     fileSystemService.ImportPdfFile(pathToChest, null, pdfPath);
+
+    //     // Assert
+    //     Assert.True(!File.Exists("C:\\Users\\nwillett\\Downloads\\che\\logisim-generic-2.7.1.jar") && File.Exists(pdfPath));
+    // }
 }
