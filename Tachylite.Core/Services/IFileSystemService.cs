@@ -1,4 +1,3 @@
-using System;
 using Tachylite.Core.Models;
 
 namespace Tachylite.Core.Services;
@@ -20,4 +19,10 @@ public interface IFileSystemService
     public string[] GetRecents();
 
     public void PopRecent();
+
+    public void CreateChestSubfolder(string chestPath, string? subfolder, string name);
+
+    public void CreateMarkdownFile(string chestPath, string? subfolder, string name);
+
+    public void ImportPdfFile(string chestPath, string? subfolder, string existingPdfPath);
 }
