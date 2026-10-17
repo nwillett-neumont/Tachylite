@@ -17,6 +17,9 @@
         VerticalAlignment="Center"
         PlaceholderText="Path to create the Chest in..." />
     <Button Content="Browse" Click="BrowseButton_Click"></Button>
-    <Button Content="Create" Command="{Binding CreateChest}"></Button>
+    <StackPanel Orientation="Horizontal">
+      <Button Content="Cancel" Command="{Binding CancelCreate}"></Button>
+      <Button Content="Create" Command="{Binding CreateChest}"></Button>
+    </StackPanel>
   </StackPanel>
 </UserControl>

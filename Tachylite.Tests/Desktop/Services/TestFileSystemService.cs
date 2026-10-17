@@ -351,4 +351,29 @@ public class Tests
     //     // Assert
     //     Assert.True(!File.Exists("C:\\Users\\nwillett\\Downloads\\che\\logisim-generic-2.7.1.jar") && File.Exists(pdfPath));
     // }
+
+    // [Fact]
+    // public void GetChestContents_FileSystemService_Desktop_GetsContentsCorrectly()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     string pathToChest = "C:\\Users\\nwillett\\Desktop\\Test";
+    //     string[] expected = [
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\balding_pics",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\balding_pics\\my_wiener.md",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\Balls",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\shud",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\shud\\Interactive_DnD_3.5_Character_Sheet.pdf",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\Cock.md",
+    //         "C:\\Users\\nwillett\\Desktop\\Test\\Hello.md",
+    //     ];
+
+    //     //Act
+    //     string[] actual = fileSystemService.GetChestContents(pathToChest);
+
+    //     // Assert
+    //     Assert.Equal(expected, actual);
+    // }
 }

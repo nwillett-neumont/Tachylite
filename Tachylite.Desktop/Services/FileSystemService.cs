@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -80,6 +82,7 @@ public class FileSystemService : IFileSystemService
 
     public void CreateNewChest(string name, string path)
     {
+        if (string.IsNullOrWhiteSpace(path)) return;
         string chestPath = Path.Combine(path, name);
         Directory.CreateDirectory(chestPath);
         Directory.CreateDirectory(Path.Combine(chestPath, ".chest"));
@@ -129,7 +132,7 @@ public class FileSystemService : IFileSystemService
         {
             newRecents[i] = recents[i + 1];
         }
-        RecentFileList newRecentsModel = new RecentFileList() { Recents = newRecents };
+        RecentFileList newRecentsModel = new() { Recents = newRecents };
         string newRecentsContent = JsonSerializer.Serialize(newRecentsModel);
         File.WriteAllText(Path.Combine(GetConfigurationDirectoryPath(), "recents.json"), newRecentsContent);
     }
@@ -172,5 +175,31 @@ public class FileSystemService : IFileSystemService
         if (Path.Exists(Path.Combine(destinationPath))) return;
 
         File.Copy(existingPdfPath, destinationPath);
+    }
+
+    public string[] GetChestContents(string chestPath)
+    {
+        if (!IsValidChest(chestPath)) return [];
+        else return GetFolderContents(chestPath);
+    }
+
+    public string[] GetFolderContents(string path)
+    {
+        List<string> folders = [.. Directory.EnumerateDirectories(path)];
+        List<string> files = [.. Directory.EnumerateFiles(path)];
+
+        List<string> finalList = [];
+
+        foreach(string folder in folders)
+        {
+            if (folder.Contains(".chest")) continue;
+            finalList.Add(folder);
+            string[] subContents = GetFolderContents(folder);
+            if (subContents.Length > 0) finalList.AddRange(subContents);
+        }
+
+        finalList.AddRange(files);
+
+        return [.. finalList];
     }
 }

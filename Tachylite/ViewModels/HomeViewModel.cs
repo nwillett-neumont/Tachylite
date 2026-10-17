@@ -1,9 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
-using Avalonia.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Tachylite.Core.Services;
@@ -14,13 +11,13 @@ namespace Tachylite.ViewModels;
 public partial class HomeViewModel : ViewModelBase
 {
     public Action? ToNewChestView;
-    public IFileSystemService? FileSystemService;
+    public IFileSystemService FileSystemService;
 
-    public IValidationService? ValidationService;
+    public IValidationService ValidationService;
     
     public string[] Recents;
 
-    public Window CurrentWindow { get; set; }
+    public Window? CurrentWindow { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(OpenPathIsValid))]
@@ -43,20 +40,20 @@ public partial class HomeViewModel : ViewModelBase
 
     public bool OpenPathIsValid =>
         !string.IsNullOrWhiteSpace(Path) &&
-        FileSystemService!.IsValidChest(Path);
+        FileSystemService.IsValidChest(Path);
     
     [RelayCommand]
     public void LoadChest(string path)
     {
         if (string.IsNullOrWhiteSpace(path) &&
-        !FileSystemService!.IsValidChest(path))
+        !FileSystemService.IsValidChest(path))
         {
             return;
         }
 
         EditorWindow editorWindow = new() { DataContext = new EditorViewModel(path, FileSystemService, ValidationService) };
         editorWindow.Show();
-        CurrentWindow.Close();
+        CurrentWindow?.Close();
     }
 
     public void OpenChest()
@@ -70,11 +67,12 @@ public partial class HomeViewModel : ViewModelBase
 
         EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path, FileSystemService, ValidationService) };
         editorWindow.Show();
-        CurrentWindow.Close();
+        CurrentWindow?.Close();
     }
 
     public void NewChest()
     {
         ToNewChestView!.Invoke();
+        Path = "";
     }
 }
