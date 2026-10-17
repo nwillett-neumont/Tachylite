@@ -21,7 +21,7 @@ public class ValidationService : IValidationService
 
     public bool UsesValidCharacters(string input)
     {
-        Regex characterCheckRegex = new(@"[^A-Za-z0-9_]*");
+        Regex characterCheckRegex = new(@"[^A-Za-z0-9_]+");
         Match match = characterCheckRegex.Match(input);
         return !match.Success;
     }
