@@ -49,10 +49,7 @@ public partial class NewChestViewModel : ViewModelBase
         OnPropertyChanged(nameof(NamingConventionIsValid));
         OnPropertyChanged(nameof(CharactersAreValid));
 
-        if (!NamingConventionIsValid && !CharactersAreValid && !CreatePathIsValid)
-        {
-            return;
-        }
+        if (!NamingConventionIsValid || !CharactersAreValid || !CreatePathIsValid) return;
 
         FileSystemService.CreateNewChest(Name, NewChestPath);
         FileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
@@ -61,5 +58,11 @@ public partial class NewChestViewModel : ViewModelBase
         editorWindow.Show();
 
         CurrentWindow.Close();
+    }
+
+    public void CancelCreate()
+    {
+        ToHomeView?.Invoke();
+        Name = NewChestPath = "";
     }
 }
