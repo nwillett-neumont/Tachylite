@@ -25,4 +25,8 @@ public interface IFileSystemService
     public void CreateMarkdownFile(string chestPath, string? subfolder, string name);
 
     public void ImportPdfFile(string chestPath, string? subfolder, string existingPdfPath);
+
+    public string[] GetChestContents(string chestPath);
+
+    public string[] GetFolderContents(string path);
 }
