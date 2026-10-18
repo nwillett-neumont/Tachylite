@@ -29,4 +29,7 @@ public interface IFileSystemService
     public string[] GetChestContents(string chestPath);
 
     public string[] GetFolderContents(string path);
+    public bool UserDocumentsDirectoryExists();
+    public void CreateUserDocumentsDirectory();
+    public string GetUserDocumentsDirectory();
 }
