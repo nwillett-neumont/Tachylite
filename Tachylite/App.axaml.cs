@@ -33,6 +33,8 @@ public partial class App : Application
         {
             IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
 
+            if (!fileSystemService.UserConfigurationDirectoryExists()) fileSystemService.InitializeUserConfigurationDirectory();
+
             string[] recents = fileSystemService.GetRecents();
 
             foreach (string path in recents)
