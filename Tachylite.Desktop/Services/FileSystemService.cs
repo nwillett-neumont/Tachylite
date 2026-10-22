@@ -96,6 +96,8 @@ public class FileSystemService : IFileSystemService
             Recents = GetRecents()
         };
 
+        if (recents.Recents.Contains(path)) return;
+
         if (recents.Recents.Length < 1)
         {
             recents.Recents = [path];
