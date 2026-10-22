@@ -44,6 +44,7 @@ public partial class App : Application
                     {
                         DataContext = new EditorViewModel(path, fileSystemService, services.GetRequiredService<IValidationService>())
                     };
+                    break;
                 }
                 else
                 {
