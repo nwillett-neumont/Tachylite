@@ -29,11 +29,11 @@ public class FileSystemService : IFileSystemService
         } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             // I am currently unable to verify that this works, so I need to test it later.
-            configurationDirectoryPath = Path.Combine("~/.config", "tachylite");
+            configurationDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "tachylite");
         } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             // I am currently unable to verify that this works, so I need to test it later.
-            configurationDirectoryPath = Path.Combine("~/Library/Application Support", "Tachylite");
+            configurationDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library/Application Support", "Tachylite");
         }
 
         return configurationDirectoryPath;
