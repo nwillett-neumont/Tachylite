@@ -70,7 +70,7 @@ public partial class EditorViewModel : ViewModelBase
         string[] chestContents = FileSystemService.GetChestContents(ChestPath);
         foreach (string item in chestContents)
         {
-            int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 8;
+            int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 12;
 
             if (Directory.Exists(item))
             {
@@ -100,7 +100,7 @@ public partial class EditorViewModel : ViewModelBase
         ValidationService.UsesValidCharacters(NewFileName);
 
     public bool PdfFileExists => !string.IsNullOrWhiteSpace(ExistingPdfPath) && 
-        File.Exists(ExistingPdfPath) && FileSystemService.GetFileType(ExistingPdfPath) == Core.Models.FileType.PDF;
+        File.Exists(ExistingPdfPath) && FileSystemService.GetFileType(ExistingPdfPath).Equals(Core.Models.FileType.PDF);
 
     public bool FolderNameIsValid => !string.IsNullOrWhiteSpace(NewFolderName) && 
         (ValidationService.ValidatePascalCase(NewFolderName) || ValidationService.ValidateSnakeCase(NewFolderName)) &&
@@ -122,6 +122,7 @@ public partial class EditorViewModel : ViewModelBase
 
     public void CreateMarkdownFile()
     {
+        if (NewFileName.EndsWith(".md")) NewFileName = NewFileName.Replace(".md", "");
         if (!string.IsNullOrWhiteSpace(NewFilePath) && Path.GetFullPath(NewFilePath).Contains(Path.GetFullPath(ChestPath))) NewFilePath = Path.GetRelativePath(ChestPath, NewFilePath);
         
         OnPropertyChanged(nameof(FileNameIsValid));
@@ -132,7 +133,7 @@ public partial class EditorViewModel : ViewModelBase
         FileSystemService.CreateMarkdownFile(ChestPath, NewFilePath, NewFileName);
 
         NewFileName = NewFilePath = "";
-        IsNewFolderDialogVisible = false;
+        IsCreateMarkdownDialogVisible = false;
         PopulateFileTree();
     }
 
@@ -269,7 +270,12 @@ public partial class EditorViewModel : ViewModelBase
                             },
                             new Button ()
                             {
-                                Content = "x",
+                                Content = new TextBlock()
+                                {
+                                    Text = "x",
+                                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                                },
                                 Command = new RelayCommand(() => Tabs.Remove(tab)),
                                 Width = 40,
                                 Height = 40,

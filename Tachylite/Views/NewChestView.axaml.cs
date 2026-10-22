@@ -41,7 +41,8 @@ public partial class NewChestView : UserControl
         System.Collections.Generic.IReadOnlyList<IStorageFolder> chestFolder = await topLevel!.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Open Chest Folder",
-            AllowMultiple = false
+            AllowMultiple = false,
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as NewChestViewModel)?.FileSystemService.GetUserDocumentsDirectory() ?? "")
         });
 
         if (chestFolder.Count > 0)

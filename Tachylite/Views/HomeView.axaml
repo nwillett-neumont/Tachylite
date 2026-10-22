@@ -6,22 +6,38 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Tachylite.Views.HomeView"
              x:DataType="vm:HomeViewModel">
-  <StackPanel Orientation="Horizontal">
+<Grid ColumnDefinitions="25*,75*">
     <StackPanel Orientation="Vertical">
-      <ItemsControl ItemsSource="{Binding RecentsButtons}">
-
-      </ItemsControl>
+      <Label Target="recentsList" Content="Recent Chests:" />
+      <ScrollViewer MaxHeight="800">
+        <ItemsControl x:Name="recentsList" Grid.Column="1" ItemsSource="{Binding RecentsButtons}">
+          <ItemsControl.Styles>
+            <Style Selector="Button.recent-button">
+                <Setter Property="Background" Value="#00000000" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="Padding" Value="8,8" />
+                <Setter Property="CornerRadius" Value="0" />
+            </Style>
+          </ItemsControl.Styles>
+        </ItemsControl>
+      </ScrollViewer>
     </StackPanel>
-    <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <Label Content=""></Label>
-        <TextBox Name="openPath"
-            Text="{Binding Path}"
+    <StackPanel Grid.Column="2"
+      Orientation="Vertical"
+      Spacing="8"
+      VerticalAlignment="Center"
+      HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal"  Spacing="8">
+          <TextBox Name="openPath"
+            Text="{Binding OpenPath}"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
+            MinWidth="200"
             PlaceholderText="Path to an existing Chest..." />
-        <Button Content="Browse" Click="BrowseButton_Click"></Button>
-        <Button Content="Open" Command="{Binding OpenChest}"></Button>
-        <Button Content="Create New Chest" ClickMode="Press" Command="{Binding NewChest}"></Button>
+          <Button Content="Browse" Click="BrowseButton_Click"></Button>
+        </StackPanel>
+        <Button Content="Open" HorizontalAlignment="Center" Command="{Binding OpenChest}"></Button>
+        <Button Content="Create New Chest" Margin="0,24,0,0" HorizontalAlignment="Center" ClickMode="Press" Command="{Binding NewChest}"></Button>
     </StackPanel>
-  </StackPanel>
+  </Grid>
 </UserControl>

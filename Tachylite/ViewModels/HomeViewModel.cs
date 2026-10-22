@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,7 +22,7 @@ public partial class HomeViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(OpenPathIsValid))]
-    public partial string Path { get; set; } = "";
+    public partial string OpenPath { get; set; } = "";
 
     public ObservableCollection<Button> RecentsButtons { get; set; }
 
@@ -29,18 +30,25 @@ public partial class HomeViewModel : ViewModelBase
     {
         Recents = recents;
         FileSystemService = fileSystemService;
-        ValidationService = validationService;
+        ValidationService = validationService; 
 
         RecentsButtons = [];
         foreach(string path in Recents)
         {
-            RecentsButtons.Add(new Button() { Content = path, Command = LoadChestCommand, CommandParameter = path });
+            Button button = new() 
+            {
+                Content = path,
+                Command = LoadChestCommand,
+                CommandParameter = path,
+            };
+            button.Classes.Add("recent-button");
+            RecentsButtons.Add(button);
         }
     }
 
     public bool OpenPathIsValid =>
-        !string.IsNullOrWhiteSpace(Path) &&
-        FileSystemService.IsValidChest(Path);
+        !string.IsNullOrWhiteSpace(OpenPath) &&
+        FileSystemService.IsValidChest(OpenPath);
     
     [RelayCommand]
     public void LoadChest(string path)
@@ -60,12 +68,14 @@ public partial class HomeViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(OpenPathIsValid));
 
-        if (!OpenPathIsValid)
+        if (!OpenPathIsValid && !Path.Exists(OpenPath))
         {
             return;
         }
 
-        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path, FileSystemService, ValidationService) };
+        FileSystemService.AddRecent(Path.GetDirectoryName(Path.GetFullPath(OpenPath))!);
+
+        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(OpenPath, FileSystemService, ValidationService) };
         editorWindow.Show();
         CurrentWindow?.Close();
     }
@@ -73,6 +83,6 @@ public partial class HomeViewModel : ViewModelBase
     public void NewChest()
     {
         ToNewChestView!.Invoke();
-        Path = "";
+        OpenPath = "";
     }
 }
