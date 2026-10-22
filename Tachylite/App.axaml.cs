@@ -26,11 +26,6 @@ public partial class App : Application
         var collection = new ServiceCollection();
         collection.AddCommonServices();
         ConfigurePlatformSpecificServices!.Invoke(collection);
-<<<<<<< Updated upstream
-=======
-
-        var services = collection.BuildServiceProvider();
->>>>>>> Stashed changes
 
         var services = collection.BuildServiceProvider();
         
