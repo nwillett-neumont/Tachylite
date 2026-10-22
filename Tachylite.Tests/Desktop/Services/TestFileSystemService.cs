@@ -376,4 +376,19 @@ public class Tests
     //     // Assert
     //     Assert.Equal(expected, actual);
     // }
+
+    [Fact]
+    public void CreateUserDocumentsDirectory_FileSystemService_Desktop_CreatesDirectory()
+    {
+        
+        //Arrange
+        fileSystemService = new FileSystemService();
+
+        //Act
+        fileSystemService.CreateUserDocumentsDirectory();
+        bool exists = fileSystemService.UserDocumentsDirectoryExists();
+
+        // Assert
+        Assert.True(exists);
+    }
 }

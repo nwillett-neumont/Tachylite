@@ -202,4 +202,64 @@ public class FileSystemService : IFileSystemService
 
         return [.. finalList];
     }
+
+    public bool UserDocumentsDirectoryExists()
+    {
+        string documentsDirectoryPath = "";
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            documentsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        }
+
+        return Path.Exists(documentsDirectoryPath);
+    }
+
+    public void CreateUserDocumentsDirectory()
+    {
+        string documentsDirectoryPath = "";
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            documentsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        }
+
+        Directory.CreateDirectory(documentsDirectoryPath);
+    }
+
+    public string GetUserDocumentsDirectory()
+    {
+        string documentsDirectoryPath = "";
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            documentsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // I am currently unable to verify that this works, so I need to test it later.
+            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+        }
+
+        return documentsDirectoryPath;
+    }
 }
