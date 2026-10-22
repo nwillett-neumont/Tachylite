@@ -11,3 +11,5 @@
 ## Implementation Changes
 
 - Hold multiple recent documents. 10/5/2026. I decided to make the application persist multiple recent chests, so that the user doesn't need to find their most recently opened chests. The application will persist the 10 most recent chests.
+
+- Store backups as a setting. 10/19/2026. I decided to support backing up files in both the user configuration directory and within the chest itself. This will be configurable by the user with four possible settings. Backup in chest, backup in user configuration directory, backup in both, or backups off.
