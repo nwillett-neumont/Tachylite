@@ -6,18 +6,26 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Tachylite.Views.NewChestView"
              x:DataType="vm:NewChestViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBox.invalid">
+      <Setter Property="BorderBrush" Value="Red" />
+      <Setter Property="PlaceholderText" Value="Path must point to a valid chest" />
+    </Style>
+  </UserControl.Styles>
   <StackPanel Orientation="Vertical"
     VerticalAlignment="Center"
     HorizontalAlignment="Center"
     Spacing="8">
     <TextBox Text="{Binding Name}"
       MinWidth="200"
-            PlaceholderText="Name of your new Chest..." />
+      PlaceholderText="Name of your new Chest..."
+      Classes.invalid="{Binding NameIsInvalid}" />
     <StackPanel Orientation="Horizontal" Spacing="8">
       <TextBox Name="newChestPath"
         MinWidth="240"
         Text="{Binding NewChestPath}"
-        PlaceholderText="Path to create the Chest in..." />
+        PlaceholderText="Path to create the Chest in..."
+        Classes.invalid="{Binding CreatePathIsInvalid}" />
       <Button Content="Browse" Click="BrowseButton_Click"></Button>
     </StackPanel>
     <StackPanel Orientation="Horizontal"

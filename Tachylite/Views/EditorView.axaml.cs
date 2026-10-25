@@ -45,8 +45,28 @@ public partial class EditorView : UserControl
             string path = chestFolder[0].Path.AbsolutePath.ToString();
             bool pathIsValid = Path.Exists(path);
             if (pathIsValid && kind.Equals("new_file")) newFilePath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
-            else if (pathIsValid && kind.Equals("import_pdf")) newPdfPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
+            else if (pathIsValid && kind.Equals("import_pdf_destination")) newPdfPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
             else if (pathIsValid && kind.Equals("new_folder")) newFolderPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
+        }
+    }
+
+    private async Task OpenFilePicker(string kind)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+
+        System.Collections.Generic.IReadOnlyList<IStorageFile> chestFolder = await topLevel!.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select File",
+            AllowMultiple = false,
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as EditorViewModel)?.ChestPath ?? ""),
+            FileTypeFilter = [FilePickerFileTypes.Pdf]
+        });
+
+        if (chestFolder.Count > 0)
+        {
+            string path = chestFolder[0].Path.AbsolutePath.ToString();
+            bool pathIsValid = Path.Exists(path);
+            if (pathIsValid && kind.Equals("import_pdf_source")) sourcePdfPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
         }
     }
 
@@ -55,9 +75,14 @@ public partial class EditorView : UserControl
         _ = OpenFolderPicker("new_file");
     }
 
-    private void ButtonImportPdf_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void ButtonImportPdfSource_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        _ = OpenFolderPicker("import_pdf");
+        _ = OpenFilePicker("import_pdf_source");
+    }
+
+    private void ButtonImportPdfDestination_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        _ = OpenFolderPicker("import_pdf_destination");
     }
 
     private void ButtonNewFolder_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

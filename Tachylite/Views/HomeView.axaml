@@ -6,19 +6,22 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Tachylite.Views.HomeView"
              x:DataType="vm:HomeViewModel">
-<Grid ColumnDefinitions="25*,75*">
+  <UserControl.Styles>
+    <Style Selector="TextBox.invalid">
+      <Setter Property="BorderBrush" Value="Red" />
+    </Style>
+    <Style Selector="Button.recent-button">
+      <Setter Property="Background" Value="#00000000" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="Padding" Value="8,8" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+  </UserControl.Styles>
+<Grid ColumnDefinitions="30*,70*">
     <StackPanel Orientation="Vertical">
       <Label Target="recentsList" Content="Recent Chests:" />
       <ScrollViewer MaxHeight="800">
         <ItemsControl x:Name="recentsList" Grid.Column="1" ItemsSource="{Binding RecentsButtons}">
-          <ItemsControl.Styles>
-            <Style Selector="Button.recent-button">
-                <Setter Property="Background" Value="#00000000" />
-                <Setter Property="FontSize" Value="16" />
-                <Setter Property="Padding" Value="8,8" />
-                <Setter Property="CornerRadius" Value="0" />
-            </Style>
-          </ItemsControl.Styles>
         </ItemsControl>
       </ScrollViewer>
     </StackPanel>
@@ -30,6 +33,7 @@
         <StackPanel Orientation="Horizontal"  Spacing="8">
           <TextBox Name="openPath"
             Text="{Binding OpenPath}"
+            Classes.invalid="{Binding OpenPathIsInvalid}"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             MinWidth="200"

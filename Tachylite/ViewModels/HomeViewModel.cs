@@ -21,7 +21,7 @@ public partial class HomeViewModel : ViewModelBase
     public Window? CurrentWindow { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(OpenPathIsValid))]
+    [NotifyPropertyChangedFor(nameof(OpenPathIsInvalid))]
     public partial string OpenPath { get; set; } = "";
 
     public ObservableCollection<Button> RecentsButtons { get; set; }
@@ -45,11 +45,16 @@ public partial class HomeViewModel : ViewModelBase
             RecentsButtons.Add(button);
         }
     }
-
-    public bool OpenPathIsValid =>
-        !string.IsNullOrWhiteSpace(OpenPath) &&
-        FileSystemService.IsValidChest(OpenPath);
     
+    public bool OpenPathIsInvalid => OpenHasBeenAttempted && 
+        (string.IsNullOrWhiteSpace(OpenPath) ||
+        !FileSystemService.IsValidChest(OpenPath) ||
+        !Path.Exists(OpenPath));
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OpenPathIsInvalid))]
+    public partial bool OpenHasBeenAttempted { get; set; } = false;
+
     [RelayCommand]
     public void LoadChest(string path)
     {
@@ -66,12 +71,12 @@ public partial class HomeViewModel : ViewModelBase
 
     public void OpenChest()
     {
-        OnPropertyChanged(nameof(OpenPathIsValid));
+        OnPropertyChanged(nameof(OpenPathIsInvalid));
+        OnPropertyChanged(nameof(OpenHasBeenAttempted));
 
-        if (!OpenPathIsValid && !Path.Exists(OpenPath))
-        {
-            return;
-        }
+        OpenHasBeenAttempted = true;
+
+        if (OpenPathIsInvalid) return;
 
         FileSystemService.AddRecent(Path.GetDirectoryName(Path.GetFullPath(OpenPath))!);
 
@@ -84,5 +89,6 @@ public partial class HomeViewModel : ViewModelBase
     {
         ToNewChestView!.Invoke();
         OpenPath = "";
+        OpenHasBeenAttempted = false;
     }
 }
