@@ -19,13 +19,14 @@ public partial class NewChestViewModel : ViewModelBase
     public Window CurrentWindow { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NameIsInvalid))]
     [NotifyPropertyChangedFor(nameof(NamingConventionIsValid))]
     [NotifyPropertyChangedFor(nameof(CharactersAreValid))]
 
     public partial string Name { get; set; } = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CreatePathIsValid))]
+    [NotifyPropertyChangedFor(nameof(CreatePathIsInvalid))]
     public partial string NewChestPath { get; set; } = "";
 
     public NewChestViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
@@ -40,16 +41,31 @@ public partial class NewChestViewModel : ViewModelBase
 
     public bool CharactersAreValid => !string.IsNullOrWhiteSpace(Name) && ValidationService.UsesValidCharacters(Name);
 
-    public bool CreatePathIsValid =>
-        !string.IsNullOrWhiteSpace(NewChestPath) &&
-        Path.Exists(NewChestPath);
+    public bool CreatePathIsInvalid => CreatePathHasBeenAttempted && 
+        (string.IsNullOrWhiteSpace(NewChestPath) ||
+        !Path.Exists(NewChestPath));
+
+    public bool NameIsInvalid => NameHasBeenAttempted && (!NamingConventionIsValid || !CharactersAreValid);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NameIsInvalid))]
+    [NotifyPropertyChangedFor(nameof(NamingConventionIsValid))]
+    [NotifyPropertyChangedFor(nameof(CharactersAreValid))]
+    public partial bool NameHasBeenAttempted { get; set; } = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CreatePathIsInvalid))]
+    public partial bool CreatePathHasBeenAttempted { get; set; } = false;
 
     public void CreateChest()
     {
         OnPropertyChanged(nameof(NamingConventionIsValid));
         OnPropertyChanged(nameof(CharactersAreValid));
 
-        if (!NamingConventionIsValid || !CharactersAreValid || !CreatePathIsValid) return;
+        NameHasBeenAttempted = true;
+        CreatePathHasBeenAttempted = true;
+
+        if (NameIsInvalid && CreatePathIsInvalid) return;
 
         FileSystemService.CreateNewChest(Name, NewChestPath);
         FileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
@@ -64,5 +80,6 @@ public partial class NewChestViewModel : ViewModelBase
     {
         ToHomeView?.Invoke();
         Name = NewChestPath = "";
+        NameHasBeenAttempted = CreatePathHasBeenAttempted = false;
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using Aspose.Pdf.Operators;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -33,6 +32,8 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
+
+            if (!fileSystemService.UserConfigurationDirectoryExists()) fileSystemService.InitializeUserConfigurationDirectory();
 
             string[] recents = fileSystemService.GetRecents();
 
