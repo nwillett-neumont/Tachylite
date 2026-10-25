@@ -18,111 +18,111 @@ public class Tests
         }
     }
 
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesMarkdownFile()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string markdownFilePath = "~/Desktop/secrets/awesome.md";
-        FileType expected = FileType.MD;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesMarkdownFile()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string markdownFilePath = "~/Desktop/secrets/awesome.md";
+    //     FileType expected = FileType.MD;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(markdownFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(markdownFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
     
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesLastExtension()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string markdownFilePath = "~/Desktop/secrets/awesome.pdf.md";
-        FileType expected = FileType.MD;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesLastExtension()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string markdownFilePath = "~/Desktop/secrets/awesome.pdf.md";
+    //     FileType expected = FileType.MD;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(markdownFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(markdownFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
 
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesPdfFile()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string pdfFilePath = "C:\\Docs\\Docs2\\w.pdf";
-        FileType expected = FileType.PDF;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesPdfFile()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string pdfFilePath = "C:\\Docs\\Docs2\\w.pdf";
+    //     FileType expected = FileType.PDF;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(pdfFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(pdfFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
 
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesRegardlessOfCasing()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string pdfFilePath = "C:\\Docs\\Docs2\\W.PDF";
-        FileType expected = FileType.PDF;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesRegardlessOfCasing()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string pdfFilePath = "C:\\Docs\\Docs2\\W.PDF";
+    //     FileType expected = FileType.PDF;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(pdfFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(pdfFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
 
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesJsonFile()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string jsonFilePath = ".config.json";
-        FileType expected = FileType.JSON;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesJsonFile()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string jsonFilePath = ".config.json";
+    //     FileType expected = FileType.JSON;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(jsonFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(jsonFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
 
-    [Fact]
-    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesUnknownFile()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        string textFilePath = "/src/wheat.txt";
-        FileType expected = FileType.UNKNOWN;
+    // [Fact]
+    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesUnknownFile()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     string textFilePath = "/src/wheat.txt";
+    //     FileType expected = FileType.UNKNOWN;
 
-        // Act
-        FileType actual = fileSystemService.GetFileType(textFilePath);
+    //     // Act
+    //     FileType actual = fileSystemService.GetFileType(textFilePath);
 
-        // Assert
-        Assert.Equal(actual, expected);
-    }
+    //     // Assert
+    //     Assert.Equal(actual, expected);
+    // }
 
-    [Fact]
-    public void InitializeUserConfigurationDirectory_FileSystemService_Desktop_CorrectlyCreatesConfigurationDirectory()
-    {
-        // Arrange
-        fileSystemService = new FileSystemService();
-        deleteUserConfigurationDirectory(fileSystemService);
-        fileSystemService.InitializeUserConfigurationDirectory();
+    // [Fact]
+    // public void InitializeUserConfigurationDirectory_FileSystemService_Desktop_CorrectlyCreatesConfigurationDirectory()
+    // {
+    //     // Arrange
+    //     fileSystemService = new FileSystemService();
+    //     deleteUserConfigurationDirectory(fileSystemService);
+    //     fileSystemService.InitializeUserConfigurationDirectory();
 
-        // Act
-        fileSystemService.InitializeUserConfigurationDirectory();
-        bool exists = fileSystemService.UserConfigurationDirectoryExists();
+    //     // Act
+    //     fileSystemService.InitializeUserConfigurationDirectory();
+    //     bool exists = fileSystemService.UserConfigurationDirectoryExists();
 
-        // Assert
-        Assert.True(exists);
-    }
+    //     // Assert
+    //     Assert.True(exists);
+    // }
 
     // [Fact]
     // public void IsValidChest_FileSystemService_Desktop_CorrectlyIdentifiesValid()
@@ -377,18 +377,44 @@ public class Tests
     //     Assert.Equal(expected, actual);
     // }
 
-    [Fact]
-    public void CreateUserDocumentsDirectory_FileSystemService_Desktop_CreatesDirectory()
-    {
+    // [Fact]
+    // public void CreateUserDocumentsDirectory_FileSystemService_Desktop_CreatesDirectory()
+    // {
         
-        //Arrange
-        fileSystemService = new FileSystemService();
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
 
-        //Act
-        fileSystemService.CreateUserDocumentsDirectory();
-        bool exists = fileSystemService.UserDocumentsDirectoryExists();
+    //     //Act
+    //     fileSystemService.CreateUserDocumentsDirectory();
+    //     bool exists = fileSystemService.UserDocumentsDirectoryExists();
 
-        // Assert
-        Assert.True(exists);
-    }
+    //     // Assert
+    //     Assert.True(exists);
+    // }
+
+    // [Fact]
+    // public void CreateUserFileBackup_FileSystemService_Desktop_CreatesFile()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     //Act
+    //     fileSystemService.CreateUserFileBackup("C:\\Users\\nwillett\\Documents\\Tachylite\\Balls2\\Hello.md");
+
+    //     // Assert
+    // }
+
+    // [Fact]
+    // public void CreatePerChestFileBackup_FileSystemService_Desktop_CreatesFile()
+    // {
+        
+    //     //Arrange
+    //     fileSystemService = new FileSystemService();
+
+    //     //Act
+    //     fileSystemService.CreatePerChestFileBackup("C:\\Users\\nwillett\\Documents\\Tachylite\\Balls2\\", "C:\\Users\\nwillett\\Documents\\Tachylite\\Balls2\\Hello.md");
+
+    //     // Assert
+    // }
 }

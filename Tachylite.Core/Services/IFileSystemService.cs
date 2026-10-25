@@ -32,4 +32,8 @@ public interface IFileSystemService
     public bool UserDocumentsDirectoryExists();
     public void CreateUserDocumentsDirectory();
     public string GetUserDocumentsDirectory();
+
+    public string GetMarkdownFileContents(string filePath);
+    public void CreateUserFileBackup(string filePath);
+    public void CreatePerChestFileBackup(string chestPath, string filePath);
 }

@@ -86,6 +86,7 @@ public class FileSystemService : IFileSystemService
         string chestPath = Path.Combine(path, name);
         Directory.CreateDirectory(chestPath);
         Directory.CreateDirectory(Path.Combine(chestPath, ".chest"));
+        Directory.CreateDirectory(Path.Combine(chestPath, ".chest", "backups"));
         File.WriteAllText(Path.Combine(chestPath, "Hello.md"), newFileMessage);
     }
 
@@ -255,13 +256,62 @@ public class FileSystemService : IFileSystemService
         } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             // I am currently unable to verify that this works, so I need to test it later.
-            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+            documentsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Tachylite");
         } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             // I am currently unable to verify that this works, so I need to test it later.
-            documentsDirectoryPath = Path.Combine("~/Documents", "Tachylite");
+            documentsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Tachylite");
         }
 
         return documentsDirectoryPath;
+    }
+
+    public string GetMarkdownFileContents(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath)) return "";
+
+        return File.ReadAllText(filePath);
+    }
+
+    public void CreateUserFileBackup(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath) || !UserConfigurationDirectoryExists()) return;
+
+        string backupFileName = filePath.Replace(Path.DirectorySeparatorChar, '-').Replace(":", "");
+
+        string[] files = [.. Directory.GetFiles(Path.Combine(GetConfigurationDirectoryPath(), "backups")).Where(file => file.Contains(backupFileName))];
+
+        byte fileNumber = (byte)(files.Length + 1);
+
+        for (int i = files.Length; i > 0; i--)
+        {
+            File.Copy(files[i-1], Path.Combine(GetConfigurationDirectoryPath(), "backups", $"{backupFileName}-{i+1}"), overwrite: true);
+            File.Delete(files[i-1]);
+        }
+
+        if (fileNumber > 5) File.Delete(Path.Combine(GetConfigurationDirectoryPath(), "backups",$"{backupFileName}-6"));
+
+        File.Copy(filePath, Path.Combine(GetConfigurationDirectoryPath(), "backups", $"{backupFileName}-1"));
+    }
+
+    public void CreatePerChestFileBackup(string chestPath, string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath) || !IsValidChest(chestPath)) return;
+
+        string backupFileName = filePath.Replace(Path.DirectorySeparatorChar, '-').Replace(":", "");
+
+        string[] files = [.. Directory.GetFiles(Path.Combine(chestPath, ".chest", "backups")).Where(file => file.Contains(backupFileName))];
+
+        byte fileNumber = (byte)(files.Length + 1);
+
+        for (int i = files.Length; i > 0; i--)
+        {
+            File.Copy(files[i-1], Path.Combine(chestPath, ".chest", "backups", $"{backupFileName}-{i+1}"), overwrite: true);
+            File.Delete(files[i-1]);
+        }
+
+        if (fileNumber > 5) File.Delete(Path.Combine(chestPath, ".chest", "backups",$"{backupFileName}-6"));
+
+        File.Copy(filePath, Path.Combine(chestPath, ".chest", "backups", $"{backupFileName}-1"));
     }
 }
