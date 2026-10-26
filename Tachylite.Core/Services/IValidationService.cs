@@ -9,4 +9,8 @@ public interface IValidationService
     public bool ValidateSnakeCase(string input);
 
     public bool UsesValidCharacters(string input);
+
+    public bool IsPositiveNumber(long number);
+
+    public bool ValidateDieNotation(string dieRoll);
 }
