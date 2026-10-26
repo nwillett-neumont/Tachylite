@@ -6,32 +6,33 @@ using Tachylite.Desktop.Services;
 
 namespace Tachylite.Tests;
 
-public class Tests
+public class TestFileSystemService
 {
-    FileSystemService? fileSystemService;
+    private FileSystemService? fileSystemService;
 
-    private void deleteUserConfigurationDirectory(FileSystemService fileSystemService)
+    private void DeleteUserConfigurationDirectory()
     {
+        fileSystemService = new();
         if (Directory.Exists(fileSystemService.GetConfigurationDirectoryPath()))
         {
             Directory.Delete(fileSystemService.GetConfigurationDirectoryPath(), true);
         }
     }
 
-    // [Fact]
-    // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesMarkdownFile()
-    // {
-    //     // Arrange
-    //     fileSystemService = new FileSystemService();
-    //     string markdownFilePath = "~/Desktop/secrets/awesome.md";
-    //     FileType expected = FileType.MD;
+    [Fact]
+    public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesMarkdownFile()
+    {
+        // Arrange
+        fileSystemService = new FileSystemService();
+        string markdownFilePath = "~/Desktop/secrets/awesome.md";
+        FileType expected = FileType.MD;
 
-    //     // Act
-    //     FileType actual = fileSystemService.GetFileType(markdownFilePath);
+        // Act
+        FileType actual = fileSystemService.GetFileType(markdownFilePath);
 
-    //     // Assert
-    //     Assert.Equal(actual, expected);
-    // }
+        // Assert
+        Assert.Equal(actual, expected);
+    }
     
     // [Fact]
     // public void GetFileType_FileSystemService_Desktop_CorrectlyIdentifiesLastExtension()
