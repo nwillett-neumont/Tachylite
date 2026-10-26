@@ -135,4 +135,48 @@ public class TestValidationService
         // Assert
         Assert.False(result);
     }
+
+    [Fact]
+    public void ValidateDieNotation_ValidationService_Core_AcceptsValidRolls()
+    {
+        // Arrange
+        validationService = new();
+        string input1 = "d1";
+        string input2 = "D1";
+        string input3 = "4d10";
+        string input4 = "33D14";
+
+        // Act
+        bool result = validationService.ValidateDieNotation(input1) && 
+        validationService.ValidateDieNotation(input2) &&
+        validationService.ValidateDieNotation(input3) &&
+        validationService.ValidateDieNotation(input4);
+        
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void ValidateDieNotation_ValidationService_Core_RejectsInvalidRolls()
+    {
+        // Arrange
+        validationService = new();
+        string input1 = "-3d1";
+        string input2 = "Pizza";
+        string input3 = "8c4";
+        string input4 = "d";
+        string input5 = "123D-3";
+        string input6 = "1D";
+
+        // Act
+        bool result = validationService.ValidateDieNotation(input1) || 
+        validationService.ValidateDieNotation(input2) ||
+        validationService.ValidateDieNotation(input3) ||
+        validationService.ValidateDieNotation(input4) ||
+        validationService.ValidateDieNotation(input5) ||
+        validationService.ValidateDieNotation(input6);
+        
+        // Assert
+        Assert.False(result);
+    }
 }

@@ -25,4 +25,11 @@ public class ValidationService : IValidationService
         Match match = characterCheckRegex.Match(input);
         return !match.Success;
     }
+
+    public bool ValidateDieNotation(string dieRoll)
+    {
+        Regex dieRegex = new(@"^[\d]*[Dd][\d]+$", RegexOptions.Multiline);
+        Match match = dieRegex.Match(dieRoll);
+        return match.Success;
+    }
 }
