@@ -10,5 +10,5 @@ public interface IDiceRollerService
 
     public long[] RollDice(string diceRoll);
 
-    public long SumOfRoll(long[] rollResults);
+    public long SumOfRoll(long[] results);
 }
