@@ -10,7 +10,5 @@ public interface IValidationService
 
     public bool UsesValidCharacters(string input);
 
-    public bool IsPositiveNumber(long number);
-
     public bool ValidateDieNotation(string dieRoll);
 }
