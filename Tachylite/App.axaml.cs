@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Services;
+using Tachylite.Tests.Core.Services;
 using Tachylite.ViewModels;
 using Tachylite.Views;
 
@@ -32,6 +33,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
+            IMarkdownService markdownService = services.GetRequiredService<IMarkdownService>();
 
             if (!fileSystemService.UserConfigurationDirectoryExists()) fileSystemService.InitializeUserConfigurationDirectory();
 

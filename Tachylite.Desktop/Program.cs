@@ -3,6 +3,7 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Services;
 using Tachylite.Desktop.Services;
+using Tachylite.Tests.Core.Services;
 
 namespace Tachylite.Desktop;
 
@@ -17,6 +18,7 @@ sealed class Program
         App.ConfigurePlatformSpecificServices = services =>
         {
             services.AddSingleton<IFileSystemService, FileSystemService>();
+            services.AddSingleton<IMarkdownService, MarkdownService>();
         };
 
         BuildAvaloniaApp()
