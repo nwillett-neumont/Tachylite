@@ -14,9 +14,9 @@ namespace Tachylite.ViewModels;
 
 public partial class EditorViewModel : ViewModelBase
 {
-    public IFileSystemService FileSystemService { get; set; }
+    private readonly IFileSystemService _fileSystemService;
 
-    public IValidationService ValidationService { get; set; }
+    private readonly IValidationService _validationService;
 
     public string ChestPath { get; set; }
 
@@ -31,6 +31,9 @@ public partial class EditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool IsNewFolderDialogVisible { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool DisplayDiceRoller { get; set; } = false;
 
     [ObservableProperty]
     public partial string NewFileName { get; set; } = "";
@@ -59,27 +62,27 @@ public partial class EditorViewModel : ViewModelBase
     public EditorViewModel(string chestPath, IFileSystemService fileSystemService, IValidationService validationService)
     {
         ChestPath = chestPath;
-        FileSystemService = fileSystemService;
-        ValidationService = validationService;
+        _fileSystemService = fileSystemService;
+        _validationService = validationService;
         PopulateFileTree();
     }
 
     public bool FileNameIsInvalid => NewFileNameHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewFileName) || 
-        !ValidationService.ValidatePascalCase(NewFileName) || !ValidationService.ValidateSnakeCase(NewFileName) ||
-        !ValidationService.UsesValidCharacters(NewFileName));
+        !_validationService.ValidatePascalCase(NewFileName) || !_validationService.ValidateSnakeCase(NewFileName) ||
+        !_validationService.UsesValidCharacters(NewFileName));
 
     public bool PdfFilePathIsInvalid => PdfFileHasBeenAttempted &&
         (string.IsNullOrWhiteSpace(ExistingPdfPath) || 
         !File.Exists(ExistingPdfPath) || 
         !File.Exists(Path.GetFullPath(ExistingPdfPath, ChestPath)) ||
-        !FileSystemService.GetFileType(ExistingPdfPath).Equals(FileType.PDF));
+        !_fileSystemService.GetFileType(ExistingPdfPath).Equals(FileType.PDF));
 
     public bool FolderNameIsInvalid => NewFolderNameHasBeenAttempted &&
         (string.IsNullOrWhiteSpace(NewFolderName) ||
-        !ValidationService.ValidatePascalCase(NewFolderName) || 
-        !ValidationService.ValidateSnakeCase(NewFolderName) ||
-        !ValidationService.UsesValidCharacters(NewFolderName));
+        !_validationService.ValidatePascalCase(NewFolderName) || 
+        !_validationService.ValidateSnakeCase(NewFolderName) ||
+        !_validationService.UsesValidCharacters(NewFolderName));
 
     public bool NewFilePathDoesNotExistInChest => NewFilePathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewFilePath));
 
@@ -114,7 +117,7 @@ public partial class EditorViewModel : ViewModelBase
     public void PopulateFileTree()
     {
         FileTree = [];
-        string[] chestContents = FileSystemService.GetChestContents(ChestPath);
+        string[] chestContents = _fileSystemService.GetChestContents(ChestPath);
         foreach (string item in chestContents)
         {
             int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 12;
@@ -179,7 +182,7 @@ public partial class EditorViewModel : ViewModelBase
 
         if (FileNameIsInvalid || NewFilePathDoesNotExistInChest) return;
 
-        FileSystemService.CreateMarkdownFile(ChestPath, NewFilePath, NewFileName);
+        _fileSystemService.CreateMarkdownFile(ChestPath, NewFilePath, NewFileName);
 
         NewFileName = NewFilePath = "";
         IsCreateMarkdownDialogVisible = false;
@@ -209,8 +212,8 @@ public partial class EditorViewModel : ViewModelBase
 
         if (PdfFilePathIsInvalid || NewPdfPathDoesNotExistInChest) return;
 
-        if (File.Exists(ExistingPdfPath)) FileSystemService.ImportPdfFile(ChestPath, NewPdfPath, ExistingPdfPath); 
-        else if(File.Exists(Path.GetFullPath(ExistingPdfPath, ChestPath))) FileSystemService.ImportPdfFile(ChestPath, NewPdfPath, Path.GetFullPath(ExistingPdfPath, ChestPath));
+        if (File.Exists(ExistingPdfPath)) _fileSystemService.ImportPdfFile(ChestPath, NewPdfPath, ExistingPdfPath); 
+        else if(File.Exists(Path.GetFullPath(ExistingPdfPath, ChestPath))) _fileSystemService.ImportPdfFile(ChestPath, NewPdfPath, Path.GetFullPath(ExistingPdfPath, ChestPath));
 
         ExistingPdfPath = NewPdfPath = "";
         IsImportPdfDialogVisible = false;
@@ -229,6 +232,11 @@ public partial class EditorViewModel : ViewModelBase
         NewFolderNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
     }
 
+    public void ShowDiceRoller()
+    {
+        DisplayDiceRoller = true;
+    }
+
     public void CreateFolder()
     {
         NewFolderNameHasBeenAttempted = NewFolderPathHasBeenAttempted = true;
@@ -239,7 +247,7 @@ public partial class EditorViewModel : ViewModelBase
 
         if (FolderNameIsInvalid || NewFolderPathDoesNotExistInChest) return;
 
-        FileSystemService.CreateChestSubfolder(ChestPath, NewFolderPath, NewFolderName);
+        _fileSystemService.CreateChestSubfolder(ChestPath, NewFolderPath, NewFolderName);
 
         NewFolderName = NewFolderPath = "";
         IsNewFolderDialogVisible = false;
@@ -249,7 +257,7 @@ public partial class EditorViewModel : ViewModelBase
 
     public void CloseChest()
     {
-        HomeWindow home = new() { DataContext = new HomeWindowViewModel(FileSystemService.GetRecents(), FileSystemService, ValidationService) };
+        HomeWindow home = new() { DataContext = new HomeWindowViewModel(_fileSystemService.GetRecents(), _fileSystemService, _validationService) };
         home.Show();
         CurrentWindow?.Close();
     }
@@ -279,7 +287,7 @@ public partial class EditorViewModel : ViewModelBase
     public void ButtonFile(string filePath)
     {
         TabItem tab = new();
-        FileType fileType = FileSystemService.GetFileType(filePath);
+        FileType fileType = _fileSystemService.GetFileType(filePath);
 
         TabItem? existingTab = null;
 

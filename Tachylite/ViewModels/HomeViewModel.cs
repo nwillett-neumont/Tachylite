@@ -12,9 +12,9 @@ namespace Tachylite.ViewModels;
 public partial class HomeViewModel : ViewModelBase
 {
     public Action? ToNewChestView;
-    public IFileSystemService FileSystemService;
+    public IFileSystemService _fileSystemService;
 
-    public IValidationService ValidationService;
+    public IValidationService _validationService;
     
     public string[] Recents;
 
@@ -29,8 +29,8 @@ public partial class HomeViewModel : ViewModelBase
     public HomeViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
     {
         Recents = recents;
-        FileSystemService = fileSystemService;
-        ValidationService = validationService; 
+        _fileSystemService = fileSystemService;
+        _validationService = validationService;
 
         RecentsButtons = [];
         foreach(string path in Recents)
@@ -48,7 +48,7 @@ public partial class HomeViewModel : ViewModelBase
     
     public bool OpenPathIsInvalid => OpenHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(OpenPath) ||
-        !FileSystemService.IsValidChest(OpenPath) ||
+        !_fileSystemService.IsValidChest(OpenPath) ||
         !Path.Exists(OpenPath));
 
     [ObservableProperty]
@@ -59,12 +59,12 @@ public partial class HomeViewModel : ViewModelBase
     public void LoadChest(string path)
     {
         if (string.IsNullOrWhiteSpace(path) &&
-        !FileSystemService.IsValidChest(path))
+        !_fileSystemService.IsValidChest(path))
         {
             return;
         }
 
-        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(path, FileSystemService, ValidationService) };
+        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(path, _fileSystemService, _validationService) };
         editorWindow.Show();
         CurrentWindow?.Close();
     }
@@ -78,9 +78,9 @@ public partial class HomeViewModel : ViewModelBase
 
         if (OpenPathIsInvalid) return;
 
-        FileSystemService.AddRecent(Path.GetDirectoryName(Path.GetFullPath(OpenPath))!);
+        _fileSystemService.AddRecent(Path.GetDirectoryName(Path.GetFullPath(OpenPath))!);
 
-        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(OpenPath, FileSystemService, ValidationService) };
+        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(OpenPath, _fileSystemService, _validationService) };
         editorWindow.Show();
         CurrentWindow?.Close();
     }

@@ -14,20 +14,20 @@ public partial class HomeWindowViewModel : ViewModelBase
     public HomeViewModel Home { get; set; }
     public NewChestViewModel NewChest { get; set; }
 
-    public IFileSystemService FileSystemService;
+    private readonly IFileSystemService _fileSystemService;
 
-    public IValidationService ValidationService;
+    private readonly IValidationService _validationService;
 
     public string[] Recents;
 
     public HomeWindowViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
     {
         Recents = recents;
-        FileSystemService = fileSystemService;
-        ValidationService = validationService;
+        _fileSystemService = fileSystemService;
+        _validationService = validationService;
 
-        Home = new(Recents, FileSystemService, ValidationService) { ToNewChestView = ToNewChestView };
-        NewChest = new(Recents, FileSystemService, ValidationService) {  ToHomeView = ToHomeView };
+        Home = new(Recents, _fileSystemService, _validationService ) { ToNewChestView = ToNewChestView };
+        NewChest = new(Recents, _fileSystemService, _validationService) { ToHomeView = ToHomeView };
 
         CurrentView = Home;
     }
