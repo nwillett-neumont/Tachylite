@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Tachylite.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Tachylite.Views.DiceRollerView"
+             x:DataType="vm:DiceRollerViewModel">
+  <UserControl.Styles>
+    <Style Selector="Border.result">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="2" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <ComboBox Name="NumberOfRollsBox"
+        SelectedIndex="0"
+        MaxDropDownHeight="180"
+        SelectedValue="{Binding NumberOfRolls}"
+        ItemsSource="{Binding RollOptions}" />
+        <ComboBox Name="NumberOfFacesBox"
+        SelectedIndex="6"
+        MaxDropDownHeight="180"
+        SelectedValue="{Binding NumberOfFaces}"
+        ItemsSource="{Binding FaceOptions}" />
+    </StackPanel>
+    <TextBox Text="{Binding DiceRollText}"></TextBox>
+    <Border Classes="result" IsVisible="{Binding ShowResult}">
+      <TextBlock Name="result" Text="{Binding RollResultText}" Padding="6"></TextBlock>
+    </Border>
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Command="{Binding RollDice}" Content="Roll"></Button>
+      <Button Click="ButtonClose_Click" Content="Close"></Button>
+    </StackPanel>
+  </StackPanel>
+</UserControl>
