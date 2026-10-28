@@ -47,7 +47,7 @@ public partial class HomeView : UserControl
         {
             Title = "Open Chest Folder",
             AllowMultiple = false,
-            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as HomeViewModel)?.FileSystemService.GetUserDocumentsDirectory() ?? "")
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as HomeViewModel)?._fileSystemService.GetUserDocumentsDirectory() ?? "")
         });
 
         if (chestFolder.Count > 0)

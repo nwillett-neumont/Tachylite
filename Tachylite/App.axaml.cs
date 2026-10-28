@@ -14,6 +14,8 @@ public partial class App : Application
 {
     public static Action<IServiceCollection>? ConfigurePlatformSpecificServices { get; set; }
 
+    public static IServiceProvider? Services { get; private set;}
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -28,12 +30,12 @@ public partial class App : Application
         collection.AddCommonServices();
         ConfigurePlatformSpecificServices!.Invoke(collection);
 
-        var services = collection.BuildServiceProvider();
+        Services = collection.BuildServiceProvider();
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
-            IMarkdownService markdownService = services.GetRequiredService<IMarkdownService>();
+            IFileSystemService fileSystemService = Services.GetRequiredService<IFileSystemService>();
+            IMarkdownService markdownService = Services.GetRequiredService<IMarkdownService>();
 
             if (!fileSystemService.UserConfigurationDirectoryExists()) fileSystemService.InitializeUserConfigurationDirectory();
 
@@ -45,7 +47,7 @@ public partial class App : Application
                 {
                     desktop.MainWindow = new EditorWindow
                     {
-                        DataContext = new EditorViewModel(path, fileSystemService, services.GetRequiredService<IValidationService>())
+                        DataContext = new EditorViewModel(path, fileSystemService, Services.GetRequiredService<IValidationService>())
                     };
                     break;
                 }
@@ -61,7 +63,7 @@ public partial class App : Application
             {
                 desktop.MainWindow = new HomeWindow
                 {
-                    DataContext = new HomeWindowViewModel(recents, fileSystemService, services.GetRequiredService<IValidationService>())
+                    DataContext = new HomeWindowViewModel(recents, fileSystemService, Services.GetRequiredService<IValidationService>())
                 };
             }
 

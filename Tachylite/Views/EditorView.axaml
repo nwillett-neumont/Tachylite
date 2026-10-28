@@ -1,8 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:vm="using:Tachylite.ViewModels"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:local="using:Tachylite.Views"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:vm="using:Tachylite.ViewModels"
+            xmlns:views="using:Tachylite.Views"
             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
             x:Class="Tachylite.Views.EditorView"
             x:DataType="vm:EditorViewModel">
@@ -12,11 +14,12 @@
       <Setter Property="PlaceholderText" Value="Path must point to a valid chest" />
     </Style>
   </UserControl.Styles>
-  <Grid ColumnDefinitions="15*,85*" RowDefinitions="10*,80*,10*">
+  <Grid ColumnDefinitions="15*,85*" RowDefinitions="10*,75*,15*">
     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Spacing="8" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0">
       <Button Height="40" Width="40" Command="{Binding ToggleCreateMarkdownDialog}"><Image Source="avares://Tachylite/Assets/new-note.png" /></Button>
       <Button Height="40" Width="40" Command="{Binding ToggleImportPdfDialog}"><Image Source="avares://Tachylite/Assets/import-pdf.png" /></Button>
       <Button Height="40" Width="40" Command="{Binding ToggleNewFolderDialog}"><Image Source="avares://Tachylite/Assets/new-folder.png" /></Button>
+      <Button Height="40" Width="40" Command="{Binding ShowDiceRoller}"><Image Source="avares://Tachylite/Assets/die-icon.png" /></Button>
     </StackPanel>
     <ScrollViewer MaxHeight="800" Grid.Column="0" Grid.Row="1">
       <ItemsControl ItemsSource="{Binding FileTree}" MaxWidth="200" HorizontalAlignment="Left"></ItemsControl>
@@ -68,6 +71,14 @@
           <Button Content="Create" Command="{Binding CreateFolder}" />
         </StackPanel>
       </StackPanel>
+    </Border>
+    <Border IsVisible="{Binding DisplayDiceRoller}"
+      HorizontalAlignment="Right" 
+      VerticalAlignment="Bottom" 
+      Grid.Column="1" 
+      Grid.Row="1" 
+      Margin="0,0,20,20">
+        <views:DiceRollerView Name="diceRollerView"/>
     </Border>
   </Grid>
 </UserControl>

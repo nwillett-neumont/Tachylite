@@ -10,9 +10,9 @@ namespace Tachylite.ViewModels;
 public partial class NewChestViewModel : ViewModelBase
 {
     public Action? ToHomeView;
-    public IFileSystemService FileSystemService;
+    private readonly IFileSystemService _fileSystemService;
 
-    public IValidationService ValidationService;
+    private readonly IValidationService _validationService;
     
     public string[] Recents;
 
@@ -32,14 +32,14 @@ public partial class NewChestViewModel : ViewModelBase
     public NewChestViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
     {
         Recents = recents;
-        FileSystemService = fileSystemService;
-        ValidationService = validationService;
+        _fileSystemService = fileSystemService;
+        _validationService = validationService;
     }
 
     public bool NamingConventionIsValid => !string.IsNullOrWhiteSpace(Name) &&
-        (ValidationService.ValidatePascalCase(Name) || ValidationService.ValidateSnakeCase(Name));
+        (_validationService.ValidatePascalCase(Name) || _validationService.ValidateSnakeCase(Name));
 
-    public bool CharactersAreValid => !string.IsNullOrWhiteSpace(Name) && ValidationService.UsesValidCharacters(Name);
+    public bool CharactersAreValid => !string.IsNullOrWhiteSpace(Name) && _validationService.UsesValidCharacters(Name);
 
     public bool CreatePathIsInvalid => CreatePathHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewChestPath) ||
@@ -67,15 +67,15 @@ public partial class NewChestViewModel : ViewModelBase
 
         if (NameIsInvalid && CreatePathIsInvalid) return;
 
-        FileSystemService.CreateNewChest(Name, NewChestPath);
-        FileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
+        _fileSystemService.CreateNewChest(Name, NewChestPath);
+        _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
 
-        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path.Combine(NewChestPath, Name), FileSystemService, ValidationService) };
+        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path.Combine(NewChestPath, Name), _fileSystemService, _validationService) };
         editorWindow.Show();
 
         CurrentWindow.Close();
     }
-
+    
     public void CancelCreate()
     {
         ToHomeView?.Invoke();

@@ -5,17 +5,22 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Tachylite.Core.Services;
 using Tachylite.ViewModels;
 
 namespace Tachylite.Views;
 
 public partial class NewChestView : UserControl
 {
+    private readonly IFileSystemService? _fileSystemService;
+
     public NewChestView()
     {
         InitializeComponent();
         DataContextChanged += SetCurrentWindow;
         AttachedToVisualTree += SetCurrentWindow;
+        _fileSystemService = App.Services?.GetRequiredService<IFileSystemService>();
     }
 
     private void SetCurrentWindow(object? sender,
@@ -42,7 +47,7 @@ public partial class NewChestView : UserControl
         {
             Title = "Open Chest Folder",
             AllowMultiple = false,
-            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as NewChestViewModel)?.FileSystemService.GetUserDocumentsDirectory() ?? "")
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync(_fileSystemService?.GetUserDocumentsDirectory() ?? "")
         });
 
         if (chestFolder.Count > 0)
