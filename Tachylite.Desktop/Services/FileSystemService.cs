@@ -268,7 +268,7 @@ public class FileSystemService : IFileSystemService
 
     public string GetMarkdownFileContents(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath)) return "";
+        if (!File.Exists(filePath)) throw new IOException("filePath must point to an existing file");
 
         return File.ReadAllText(filePath);
     }

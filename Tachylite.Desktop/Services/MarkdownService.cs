@@ -16,8 +16,6 @@ public class MarkdownService : IMarkdownService
 
     public string GetMarkdownHtml(string markdown)
     {
-        if (string.IsNullOrWhiteSpace(markdown)) throw new ArgumentException("String cannot be empty or null");
-
         return Markdown.ToHtml(markdown, Pipeline);
     }
 }
