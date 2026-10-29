@@ -14,14 +14,27 @@
       <Setter Property="PlaceholderText" Value="Path must point to a valid chest" />
     </Style>
   </UserControl.Styles>
-  <Grid ColumnDefinitions="15*,85*" RowDefinitions="10*,75*,15*">
+  <Grid ColumnDefinitions="15*,85*" RowDefinitions="10*,80*,10*">
     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Spacing="8" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0">
       <Button Height="40" Width="40" Command="{Binding ToggleCreateMarkdownDialog}"><Image Source="avares://Tachylite/Assets/new-note.png" /></Button>
       <Button Height="40" Width="40" Command="{Binding ToggleImportPdfDialog}"><Image Source="avares://Tachylite/Assets/import-pdf.png" /></Button>
       <Button Height="40" Width="40" Command="{Binding ToggleNewFolderDialog}"><Image Source="avares://Tachylite/Assets/new-folder.png" /></Button>
       <Button Height="40" Width="40" Command="{Binding ShowDiceRoller}"><Image Source="avares://Tachylite/Assets/die-icon.png" /></Button>
     </StackPanel>
-    <ScrollViewer MaxHeight="800" Grid.Column="0" Grid.Row="1">
+    <ScrollViewer MaxHeight="800" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch">
+      <ScrollViewer.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Create New Markdown File"
+            Command="{Binding ToggleContextMenuCreateMarkdownDialogCommand}"
+            CommandParameter="{Binding ChestPath}"  />
+          <MenuItem Header="Import PDF File"
+            Command="{Binding ToggleContextMenuImportPdfDialogCommand}"
+            CommandParameter="{Binding ChestPath}"  />
+          <MenuItem Header="Create New Folder"
+            Command="{Binding ToggleContextMenuNewFolderDialogCommand}"
+            CommandParameter="{Binding ChestPath}"  />
+        </ContextMenu>
+      </ScrollViewer.ContextMenu>
       <ItemsControl ItemsSource="{Binding FileTree}" MaxWidth="200" HorizontalAlignment="Left"></ItemsControl>
     </ScrollViewer>
     <Panel Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
@@ -34,8 +47,8 @@
     <Border IsVisible="{Binding IsCreateMarkdownDialogVisible}" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="20" Background="Black">
       <StackPanel Orientation="Vertical">
         <TextBox Text="{Binding NewFileName}" PlaceholderText="Name for new file..." Classes.invalid="{Binding FileNameIsInvalid}" ></TextBox>
-        <TextBox Name="newFilePath" Text="{Binding NewFilePath}" PlaceholderText="Path to put file in..." Classes.invalid="{Binding NewFilePathDoesNotExistInChest}" ></TextBox>
-        <Button Content="Browse" Click="ButtonNewFile_Click" />
+        <TextBox Name="newFilePath" Text="{Binding NewFilePath}" PlaceholderText="Path to put file in..." Classes.invalid="{Binding NewFilePathDoesNotExistInChest}" IsEnabled="{Binding NewFilePathIsEnabled}" ></TextBox>
+        <Button Content="Browse" Click="ButtonNewFile_Click" IsEnabled="{Binding NewFilePathIsEnabled}"/>
         <StackPanel Orientation="Horizontal" Spacing="8"
             HorizontalAlignment="Center">
           <Button Content="Cancel" Command="{Binding ToggleCreateMarkdownDialog}" />
@@ -50,8 +63,8 @@
           <Button Content="Browse" Click="ButtonImportPdfSource_Click" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="newPdfPath" Text="{Binding NewPdfPath}" PlaceholderText="Path put file in..." Classes.invalid="{Binding NewPdfPathDoesNotExistInChest}" ></TextBox>
-            <Button Content="Browse" Click="ButtonImportPdfDestination_Click" />
+            <TextBox Name="newPdfPath" Text="{Binding NewPdfPath}" PlaceholderText="Path put file in..." Classes.invalid="{Binding NewPdfPathDoesNotExistInChest}" IsEnabled="{Binding NewPdfPathIsEnabled}" ></TextBox>
+            <Button Content="Browse" Click="ButtonImportPdfDestination_Click" IsEnabled="{Binding NewPdfPathIsEnabled}" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8"
             HorizontalAlignment="Center">
@@ -63,8 +76,8 @@
     <Border IsVisible="{Binding IsNewFolderDialogVisible}" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="20" Background="Black">
       <StackPanel Orientation="Vertical">
         <TextBox Text="{Binding NewFolderName}" PlaceholderText="Name for the new folder..." Classes.invalid="{Binding FolderNameIsInvalid}" ></TextBox>
-        <TextBox Name="newFolderPath" Text="{Binding NewFolderPath}" PlaceholderText="Path put folder in..." Classes.invalid="{Binding NewFolderPathDoesNotExistInChest}"></TextBox>
-        <Button Content="Browse" Click="ButtonNewFolder_Click" />
+        <TextBox Name="newFolderPath" Text="{Binding NewFolderPath}" PlaceholderText="Path put folder in..." Classes.invalid="{Binding NewFolderPathDoesNotExistInChest}" IsEnabled="{Binding NewFolderPathIsEnabled}"></TextBox>
+        <Button Content="Browse" Click="ButtonNewFolder_Click" IsEnabled="{Binding NewFolderPathIsEnabled}"/>
         <StackPanel Orientation="Horizontal" Spacing="8"
             HorizontalAlignment="Center">
           <Button Content="Cancel" Command="{Binding ToggleNewFolderDialog}" />

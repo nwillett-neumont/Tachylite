@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input.TextInput;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,6 @@ public partial class EditorViewModel : ViewModelBase
     public Window? CurrentWindow { get; set; }
 
     [ObservableProperty]
-    // [NotifyCanExecuteChangedFor(nameof(ToggleCreateMarkdownDialog))]
     public partial bool IsCreateMarkdownDialogVisible { get; set; } = false;
 
     [ObservableProperty]
@@ -71,19 +71,19 @@ public partial class EditorViewModel : ViewModelBase
 
     public bool FileNameIsInvalid => NewFileNameHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewFileName) || 
-        !_validationService.ValidatePascalCase(NewFileName) || !_validationService.ValidateSnakeCase(NewFileName) ||
+        !(_validationService.ValidatePascalCase(NewFileName) || _validationService.ValidateSnakeCase(NewFileName)) ||
         !_validationService.UsesValidCharacters(NewFileName));
 
     public bool PdfFilePathIsInvalid => PdfFileHasBeenAttempted &&
         (string.IsNullOrWhiteSpace(ExistingPdfPath) || 
-        !File.Exists(ExistingPdfPath) || 
-        !File.Exists(Path.GetFullPath(ExistingPdfPath, ChestPath)) ||
+        !(File.Exists(ExistingPdfPath) || 
+        File.Exists(Path.GetFullPath(ExistingPdfPath, ChestPath))) ||
         !_fileSystemService.GetFileType(ExistingPdfPath).Equals(FileType.PDF));
 
     public bool FolderNameIsInvalid => NewFolderNameHasBeenAttempted &&
         (string.IsNullOrWhiteSpace(NewFolderName) ||
-        !_validationService.ValidatePascalCase(NewFolderName) || 
-        !_validationService.ValidateSnakeCase(NewFolderName) ||
+        !(_validationService.ValidatePascalCase(NewFolderName) || 
+        _validationService.ValidateSnakeCase(NewFolderName)) ||
         !_validationService.UsesValidCharacters(NewFolderName));
 
     public bool NewFilePathDoesNotExistInChest => NewFilePathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewFilePath));
@@ -115,6 +115,15 @@ public partial class EditorViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NewFolderPathDoesNotExistInChest))]
     public partial bool NewFolderPathHasBeenAttempted { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool NewFilePathIsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool NewPdfPathIsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool NewFolderPathIsEnabled { get; set; } = true;
 
     public void PopulateFileTree()
     {
@@ -153,7 +162,40 @@ public partial class EditorViewModel : ViewModelBase
             });
             fileTreeButton.SetValue(ToolTip.ShowDelayProperty, 1800);
 
-            if (Directory.Exists(item)) fileTreeButton.Command = ButtonDirectoryCommand;
+            if (Directory.Exists(item))
+            {
+                fileTreeButton.Command = ButtonDirectoryCommand;
+                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
+                {
+                    Items =
+                    {
+                        new MenuItem()
+                        {
+                            Header = "Create New Markdown File",
+                            Command = ToggleContextMenuCreateMarkdownDialogCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        },
+                        new MenuItem()
+                        {
+                            Header = "Import PDF File",
+                            Command = ToggleContextMenuImportPdfDialogCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        },
+                        new MenuItem()
+                        {
+                            Header = "Create New Folder",
+                            Command = ToggleContextMenuNewFolderDialogCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        },
+                        new MenuItem()
+                        {
+                            Header = "Collapse Folder",
+                            Command = ButtonDirectoryCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        }
+                    }
+                });
+            }
             else fileTreeButton.Command = ButtonFileCommand;
 
             FileTree.Add(fileTreeButton);
@@ -161,15 +203,29 @@ public partial class EditorViewModel : ViewModelBase
         OnPropertyChanged(nameof(FileTree));
     }
 
+    public void ShowDiceRoller()
+    {
+        DisplayDiceRoller = true;
+    }
+
     [RelayCommand]
     public void ToggleCreateMarkdownDialog()
     {
+        NewFilePathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsImportPdfDialogVisible = false;
         IsCreateMarkdownDialogVisible = !IsCreateMarkdownDialogVisible;
 
         NewFileName = NewFilePath = "";
         NewFileNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
+    }
+
+    [RelayCommand]
+    public void ToggleContextMenuCreateMarkdownDialog(string currentPath)
+    {
+        ToggleCreateMarkdownDialog();
+        NewFilePathIsEnabled = false;
+        NewFilePath = Path.GetRelativePath(ChestPath, currentPath);
     }
 
     public void CreateMarkdownFile()
@@ -195,12 +251,21 @@ public partial class EditorViewModel : ViewModelBase
     [RelayCommand]
     public void ToggleImportPdfDialog()
     {
+        NewPdfPathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsCreateMarkdownDialogVisible = false;
         IsImportPdfDialogVisible = !IsImportPdfDialogVisible;
 
         ExistingPdfPath = NewPdfPath = "";
         PdfFileHasBeenAttempted = PdfPathHasBeenAttempted = false;
+    }
+
+    [RelayCommand]
+    public void ToggleContextMenuImportPdfDialog(string currentPath)
+    {
+        ToggleImportPdfDialog();
+        NewPdfPathIsEnabled = false;
+        NewPdfPath = Path.GetRelativePath(ChestPath, currentPath);
     }
 
     public void ImportPdfFile()
@@ -226,6 +291,7 @@ public partial class EditorViewModel : ViewModelBase
     [RelayCommand]
     public void ToggleNewFolderDialog()
     {
+        NewFolderPathIsEnabled = true;
         IsCreateMarkdownDialogVisible = false;
         IsImportPdfDialogVisible = false;
         IsNewFolderDialogVisible = !IsNewFolderDialogVisible;
@@ -234,9 +300,12 @@ public partial class EditorViewModel : ViewModelBase
         NewFolderNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
     }
 
-    public void ShowDiceRoller()
+    [RelayCommand]
+    public void ToggleContextMenuNewFolderDialog(string currentPath)
     {
-        DisplayDiceRoller = true;
+        ToggleNewFolderDialog();
+        NewFolderPathIsEnabled = false;
+        NewFolderPath = Path.GetRelativePath(ChestPath, currentPath);
     }
 
     public void CreateFolder()
