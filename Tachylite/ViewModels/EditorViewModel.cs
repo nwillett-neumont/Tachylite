@@ -6,8 +6,10 @@ using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
+using Tachylite.Tests.Core.Services;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
@@ -341,7 +343,7 @@ public partial class EditorViewModel : ViewModelBase
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8
                     };
-                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath) };
+                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath, _fileSystemService, _validationService, App.Services!.GetRequiredService<IMarkdownService>()) };
                 
                 break;
             case FileType.PDF:
