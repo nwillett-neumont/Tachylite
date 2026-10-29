@@ -25,7 +25,7 @@
       <ItemsControl ItemsSource="{Binding FileTree}" MaxWidth="200" HorizontalAlignment="Left"></ItemsControl>
     </ScrollViewer>
     <Panel Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
-      <TabControl ItemsSource="{Binding Tabs}" SelectedItem="{Binding CurrentTab}"></TabControl>
+      <TabControl ItemsSource="{Binding Tabs}" SelectedItem="{Binding CurrentTab}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TabControl>
     </Panel>
     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="8" Grid.Column="0" Grid.Row="2">
       <TextBlock Text="{Binding ChestPath}" VerticalAlignment="Center" HorizontalAlignment="Center" />

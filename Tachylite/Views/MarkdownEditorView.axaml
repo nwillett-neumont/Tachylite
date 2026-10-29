@@ -4,8 +4,17 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:vm="using:Tachylite.ViewModels"
             xmlns:views="using:Tachylite.Views"
+            xmlns:local="using:Tachylite"
             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
             x:Class="Tachylite.Views.MarkdownEditorView"
             x:DataType="vm:MarkdownEditorViewModel">
-<TextBlock Text="{Binding FilePath}"></TextBlock>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RowDefinitions="5*, 95*">
+        <Button x:Name="SwitchButton" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding SwitchView}" Content="{Binding SwitchButtonText}"></Button>
+        <Panel IsVisible="{Binding EditorIsVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
+            <TextBox Text="{Binding FilePath, Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBox>
+        </Panel>
+        <Panel IsVisible="{Binding PreviewIsVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
+            <NativeWebView Name="webView" local:NativeWebViewHtmlSource.HtmlSource="{Binding MarkdownHtml}"></NativeWebView>
+        </Panel>
+    </Grid>
 </UserControl>
