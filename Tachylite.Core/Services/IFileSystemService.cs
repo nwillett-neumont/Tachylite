@@ -36,4 +36,6 @@ public interface IFileSystemService
     public string GetMarkdownFileContents(string filePath);
     public void CreateUserFileBackup(string filePath);
     public void CreatePerChestFileBackup(string chestPath, string filePath);
+
+    public void SaveMarkdownFile(string filePath, string content);
 }

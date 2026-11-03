@@ -314,4 +314,12 @@ public class FileSystemService : IFileSystemService
 
         File.Copy(filePath, Path.Combine(chestPath, ".chest", "backups", $"{backupFileName}-1"));
     }
+
+    public void SaveMarkdownFile(string filePath, string content)
+    {
+        if (!File.Exists(filePath)) throw new IOException($"File does not exist.");
+        else if (GetFileType(filePath) != FileType.MD) throw new IOException($"File given is not a markdown file.");
+
+        File.WriteAllTextAsync(filePath, content);
+    }
 }

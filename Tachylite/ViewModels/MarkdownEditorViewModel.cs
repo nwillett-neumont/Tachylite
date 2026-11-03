@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Aspose.Pdf.Operators;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
@@ -14,11 +17,14 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     private readonly IFileSystemService _fileSystemService;
     private readonly IValidationService _validationService;
     private readonly IMarkdownService _markdownService;
+    private readonly IUndoService _undoService;
 
-    [ObservableProperty]
-    public partial string FilePath { get; set; }
+    
+    public readonly string FilePath;
     [ObservableProperty]
     public partial string EditorText { get; set; }
+
+    public string CurrentFileContent { get; set; }
 
     [ObservableProperty]
     public partial string SwitchButtonText { get; set; } = "Preview";
@@ -26,17 +32,30 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     [ObservableProperty]
     public partial string MarkdownHtml { get; set; } = "";
 
-    public MarkdownEditorViewModel(string filePath, IFileSystemService fileSystemService, IValidationService validationService, IMarkdownService markdownService)
+    public const int TIMER_DELAY = 200;
+    private readonly PeriodicTimer _saveTimer;
+    private readonly CancellationTokenSource _cancellationToken;
+    private readonly Lock _locker;
+
+    public MarkdownEditorViewModel(string filePath, IFileSystemService fileSystemService, IValidationService validationService, IMarkdownService markdownService, IUndoService undoService)
     {
         FilePath = filePath;
         _fileSystemService = fileSystemService;
         _validationService = validationService;
         _markdownService = markdownService;
+        _undoService = undoService;
 
-        PopulateFile();
+        PopulateEditor();
+        CurrentFileContent = EditorText ?? "";
+
+        _saveTimer = new(TimeSpan.FromMilliseconds(TIMER_DELAY));
+        _cancellationToken = new();
+        _locker = new();
+
+        _ = Task.Run(StartTimer);
     }
 
-    public void PopulateFile()
+    public void PopulateEditor()
     {
         if (!File.Exists(FilePath)) throw new IOException("The file path does not exist.");
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
@@ -64,5 +83,34 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
 
         MarkdownHtml = _markdownService.GetMarkdownHtml(EditorText);
+    }
+
+    public async Task StartTimer()
+    {
+        try
+        {
+            while (await _saveTimer.WaitForNextTickAsync(_cancellationToken.Token))
+            {
+                SaveMarkdownFile();
+            }
+        } catch(OperationCanceledException)
+        {
+            _saveTimer.Dispose();
+        } catch(Exception exception)
+        {
+            Console.WriteLine(exception.Message);
+        }
+    }
+
+    public void SaveMarkdownFile()
+    {
+        lock(_locker)
+        {
+            if (EditorText != CurrentFileContent)
+            {
+                _fileSystemService.SaveMarkdownFile(FilePath, EditorText);
+                CurrentFileContent = EditorText;
+            }
+        }
     }
 }

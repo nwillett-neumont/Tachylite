@@ -412,7 +412,7 @@ public partial class EditorViewModel : ViewModelBase
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8
                     };
-                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath, _fileSystemService, _validationService, App.Services!.GetRequiredService<IMarkdownService>()) };
+                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath, _fileSystemService, _validationService, App.Services!.GetRequiredService<IMarkdownService>(), App.Services!.GetRequiredService<IUndoService>()) };
                 
                 break;
             case FileType.PDF:
