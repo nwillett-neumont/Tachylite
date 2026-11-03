@@ -17,6 +17,8 @@ public partial class MarkdownEditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string FilePath { get; set; }
+    [ObservableProperty]
+    public partial string EditorText { get; set; }
 
     [ObservableProperty]
     public partial string SwitchButtonText { get; set; } = "Preview";
@@ -30,6 +32,16 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _fileSystemService = fileSystemService;
         _validationService = validationService;
         _markdownService = markdownService;
+
+        PopulateFile();
+    }
+
+    public void PopulateFile()
+    {
+        if (!File.Exists(FilePath)) throw new IOException("The file path does not exist.");
+        else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
+
+        EditorText = _fileSystemService.GetMarkdownFileContents(FilePath);
     }
 
     [ObservableProperty]
@@ -50,8 +62,7 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     {
         if (!File.Exists(FilePath)) throw new IOException("The file path does not exist.");
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
-        
-        string fileContents = _fileSystemService.GetMarkdownFileContents(FilePath);
-        MarkdownHtml = _markdownService.GetMarkdownHtml(fileContents);
+
+        MarkdownHtml = _markdownService.GetMarkdownHtml(EditorText);
     }
 }
