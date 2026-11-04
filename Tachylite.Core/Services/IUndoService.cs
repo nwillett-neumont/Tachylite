@@ -4,6 +4,7 @@ namespace Tachylite.Core.Services;
 
 public interface IUndoService
 {
+    public void SetCurrentStateReference(string currentStateReference);
     public void SaveState(string newState);
 
     public void OnTimerReset();
