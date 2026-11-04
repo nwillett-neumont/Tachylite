@@ -88,10 +88,24 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(Path.Combine(chestPath, ".chest"));
         Directory.CreateDirectory(Path.Combine(chestPath, ".chest", "backups"));
         File.WriteAllText(Path.Combine(chestPath, "Hello.md"), newFileMessage);
+
+        CopySharedFolderToChest(Path.Combine(GetConfigurationDirectoryPath(), "shared"), Path.Combine(chestPath, ".chest"));
+    }
+
+    private void CopySharedFolderToChest(string sharedDirectory, string chestPath)
+    {
+        string[] contents = GetFolderContents(sharedDirectory);
+        foreach(var item in contents)
+        {
+            if (Directory.Exists(item)) Directory.CreateDirectory(Path.Combine(chestPath, Path.GetRelativePath(sharedDirectory, item)));
+            else File.Copy(item, Path.Combine(chestPath, Path.Combine(chestPath, Path.GetRelativePath(sharedDirectory, item))));
+        }
     }
 
     public void AddRecent(string path)
     {
+        if (path.Contains('\\')) path = path.Replace('\\', Path.DirectorySeparatorChar);
+        if (path.Contains('/')) path = path.Replace('/', Path.DirectorySeparatorChar);
         RecentFileList recents = new()
         {
             Recents = GetRecents()
