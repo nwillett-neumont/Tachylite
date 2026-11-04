@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -19,8 +20,8 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     private readonly IMarkdownService _markdownService;
     private readonly IUndoService _undoService;
 
-    
     public readonly string FilePath;
+
     [ObservableProperty]
     public partial string EditorText { get; set; }
 
@@ -32,7 +33,7 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     [ObservableProperty]
     public partial string MarkdownHtml { get; set; } = "";
 
-    public const int TIMER_DELAY = 200;
+    public const int TIMER_DELAY = 600;
     private readonly PeriodicTimer _saveTimer;
     private readonly CancellationTokenSource _cancellationToken;
     private readonly Lock _locker;
@@ -45,8 +46,8 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _markdownService = markdownService;
         _undoService = undoService;
 
-        PopulateEditor();
-        CurrentFileContent = EditorText ?? "";
+        EditorText = PopulateEditor() ?? "";
+        CurrentFileContent = EditorText;
 
         _saveTimer = new(TimeSpan.FromMilliseconds(TIMER_DELAY));
         _cancellationToken = new();
@@ -55,12 +56,17 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _ = Task.Run(StartTimer);
     }
 
-    public void PopulateEditor()
+    public string PopulateEditor()
     {
         if (!File.Exists(FilePath)) throw new IOException("The file path does not exist.");
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
 
-        EditorText = _fileSystemService.GetMarkdownFileContents(FilePath);
+        return _fileSystemService.GetMarkdownFileContents(FilePath);
+    }
+
+    partial void OnEditorTextChanged(string value)
+    {
+        _undoService.SetCurrentStateReference(EditorText);
     }
 
     [ObservableProperty]
@@ -83,6 +89,17 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
 
         MarkdownHtml = _markdownService.GetMarkdownHtml(EditorText);
+    }
+
+    public void Undo()
+    {
+        try
+        {
+            EditorText = _undoService.Undo();
+        } catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     public async Task StartTimer()
