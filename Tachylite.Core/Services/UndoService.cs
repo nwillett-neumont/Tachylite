@@ -26,6 +26,8 @@ public class UndoService : IUndoService
         _saveStateTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(TIMER_DELAY));
         _cancellationToken = new();
 
+        currentStateReference = "";
+
         _ = Task.Run(StartTimer);
     }
 
