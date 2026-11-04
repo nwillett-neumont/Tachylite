@@ -4,20 +4,21 @@ namespace Tachylite.Core.Services;
 
 public class UndoService : IUndoService
 {
-    public const int TIMER_DELAY = 200;
-    public const int CHANGE_HISTORY_MAX = 10;
-    public Stack<string> ChangeHistory { get; } = new Stack<string>();
+    public const int TIMER_DELAY = 600;
+    public const int CHANGE_HISTORY_MAX = 80;
+    private readonly Stack<string> changeHistory = new();
 
-    public string CurrentStateReference { get; set; } = "";
+    private string currentStateReference;
 
-    public bool CanUpdateChangeHistory { get; set; } = false;
+    private string? mostRecentUndoneState;
 
-    public bool ContentStateHasChanged { get; set; } = false;
+    private bool canUpdateChangeHistory= false;
+
+    private bool contentStateHasChanged = false;
 
     private readonly PeriodicTimer _saveStateTimer;
     private readonly CancellationTokenSource _cancellationToken;
     private bool _timerShouldStop = false;
-
     private readonly Lock _locker = new();
 
     public UndoService()
@@ -25,23 +26,31 @@ public class UndoService : IUndoService
         _saveStateTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(TIMER_DELAY));
         _cancellationToken = new();
 
+        currentStateReference = "";
+
         _ = Task.Run(StartTimer);
+    }
+
+    public void SetCurrentStateReference(string currentStateReference)
+    {
+        this.currentStateReference = currentStateReference;
     }
 
     public void SaveState(string newState)
     {
-        if (ChangeHistory.Count >= CHANGE_HISTORY_MAX) RemoveBottomState();
-        ContentStateHasChanged = HasContentStateChanged(newState);
-        if (CanUpdateChangeHistory && ContentStateHasChanged)
+        if (changeHistory.Count >= CHANGE_HISTORY_MAX) RemoveBottomState();
+        contentStateHasChanged = HasContentStateChanged(newState);
+        if (canUpdateChangeHistory && contentStateHasChanged && !newState.Equals(mostRecentUndoneState))
         {
-            ChangeHistory.Push(newState);
-            CanUpdateChangeHistory = false;
+            changeHistory.Push(newState);
+            canUpdateChangeHistory = false;
         }
     }
 
     public void OnTimerReset()
     {
-        CanUpdateChangeHistory = true;
+        canUpdateChangeHistory = true;
+        SaveState(currentStateReference);
         if (_timerShouldStop)
         {
             _cancellationToken.Dispose();
@@ -53,8 +62,10 @@ public class UndoService : IUndoService
     {
         lock (_locker)
         {
-            if (ChangeHistory.Count == 0) throw new NullReferenceException("There are no elements in the change history.");
-            return ChangeHistory.Pop();
+            if (changeHistory.Count == 0) throw new NullReferenceException("There are no elements in the change history.");
+            if (mostRecentUndoneState == changeHistory.Peek()) _ = changeHistory.Pop();
+            mostRecentUndoneState = changeHistory.Peek();
+            return changeHistory.Pop();
         }
     }
 
@@ -62,12 +73,12 @@ public class UndoService : IUndoService
     {
         lock (_locker)
         {
-            if (ChangeHistory.Count < 2) return;
-            string[] changeHistoryDuplicate = [..ChangeHistory];
-            ChangeHistory.Clear();
+            if (changeHistory.Count < 2) return;
+            string[] changeHistoryDuplicate = [..changeHistory];
+            changeHistory.Clear();
             for (int i = changeHistoryDuplicate.Length - 2; i >= 0; i--)
             {
-                ChangeHistory.Push(changeHistoryDuplicate[i]);
+                changeHistory.Push(changeHistoryDuplicate[i]);
             }
         }
     }
@@ -76,7 +87,7 @@ public class UndoService : IUndoService
     {
         lock (_locker)
         {
-            if (currentState.Equals(ChangeHistory.Peek())) return false;
+            if (changeHistory.Count > 0 && currentState.Equals(changeHistory.Peek())) return false;
             return true;
         }
     }
