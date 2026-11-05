@@ -43,7 +43,7 @@ public partial class NewChestViewModel : ViewModelBase
 
     public bool CreatePathIsInvalid => CreatePathHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewChestPath) ||
-        !Path.Exists(NewChestPath));
+        !Path.Exists(NewChestPath) || Path.Exists(Path.Combine(NewChestPath, Name)));
 
     public bool NameIsInvalid => NameHasBeenAttempted && (!NamingConventionIsValid || !CharactersAreValid);
 
@@ -65,7 +65,7 @@ public partial class NewChestViewModel : ViewModelBase
         NameHasBeenAttempted = true;
         CreatePathHasBeenAttempted = true;
 
-        if (NameIsInvalid && CreatePathIsInvalid) return;
+        if (NameIsInvalid || CreatePathIsInvalid) return;
 
         _fileSystemService.CreateNewChest(Name, NewChestPath);
         _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
