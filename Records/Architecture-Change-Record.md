@@ -13,3 +13,5 @@
 - Hold multiple recent documents. 10/5/2026. I decided to make the application persist multiple recent chests, so that the user doesn't need to find their most recently opened chests. The application will persist the 10 most recent chests.
 
 - Store backups as a setting. 10/19/2026. I decided to support backing up files in both the user configuration directory and within the chest itself. This will be configurable by the user with four possible settings. Backup in chest, backup in user configuration directory, backup in both, or backups off.
+
+- Implement SVG image rendering. 11/5/2026. I decided to leverage the Svg.Controls.Skia.Avalonia package to render my PDFs and Icons as SVG images where possible. I will still have support for fetching Bitmaps in the PDF Service, but I will likely not be using it. It is possible to make using Bitmaps a setting, but that is a change to be decided on at a later date.
