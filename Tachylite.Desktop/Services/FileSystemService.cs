@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Aspose.Pdf.Operators;
+using Avalonia.Markup.Xaml.Templates;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
 
@@ -59,6 +61,7 @@ public class FileSystemService : IFileSystemService
             Path.Exists(Path.Combine(GetConfigurationDirectoryPath(), "shared")) &&
             Path.Exists(Path.Combine(GetConfigurationDirectoryPath(), "backups")) &&
             File.Exists(Path.Combine(GetConfigurationDirectoryPath(), "recents.json")) &&
+            File.Exists(Path.Combine(GetConfigurationDirectoryPath(), "templates.json")) &&
             File.Exists(Path.Combine(GetConfigurationDirectoryPath(), "settings.json"));
 
         return existsAndContainsItems;
@@ -73,6 +76,7 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(Path.Combine(configurationDirectoryPath, "backups"));
         File.WriteAllText(Path.Combine(configurationDirectoryPath, "settings.json"), "{}");
         File.WriteAllText(Path.Combine(configurationDirectoryPath, "recents.json"), "{\"Recents\":[]}");
+        File.WriteAllText(Path.Combine(configurationDirectoryPath, "templates.json"), "{\"Templates\":[]}");
     }
 
     public bool IsValidChest(string path)
@@ -80,7 +84,7 @@ public class FileSystemService : IFileSystemService
         return Path.Exists(path) && Path.Exists(Path.Combine(path, ".chest"));
     }
 
-    public void CreateNewChest(string name, string path)
+    public void CreateNewChest(string name, string path, TemplateModel? template)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
         string chestPath = Path.Combine(path, name);
@@ -90,6 +94,8 @@ public class FileSystemService : IFileSystemService
         File.WriteAllText(Path.Combine(chestPath, "Hello.md"), newFileMessage);
 
         CopySharedFolderToChest(Path.Combine(GetConfigurationDirectoryPath(), "shared"), Path.Combine(chestPath, ".chest"));
+
+        if (template != null) WriteFolderModelStructure(chestPath, null, template.Root);
     }
 
     private void CopySharedFolderToChest(string sharedDirectory, string chestPath)
@@ -335,5 +341,90 @@ public class FileSystemService : IFileSystemService
         else if (GetFileType(filePath) != FileType.MD) throw new IOException($"File given is not a markdown file.");
 
         File.WriteAllTextAsync(filePath, content);
+    }
+
+    public void RenameFile(string filePath, string newName)
+    {
+        string? newFilePath = Path.GetDirectoryName(filePath);
+
+        if (!File.Exists(filePath)) throw new IOException("File at given path does not exist.");
+        else if (string.IsNullOrEmpty(newFilePath)) throw new IOException("The destination path is either null or inaccessible.");
+        else if (File.Exists(newFilePath)) throw new IOException("File exists at destination path already.");
+
+        File.Move(filePath, newFilePath);
+    }
+    public void RenameFolder(string folderPath, string newName)
+    {
+        string? newFolderPath = Path.GetDirectoryName(folderPath);
+
+        if (!Directory.Exists(folderPath)) throw new IOException("Folder at the given path does not exist.");
+        else if (string.IsNullOrEmpty(newFolderPath)) throw new IOException("The destination path is either null or inaccessible.");
+        else if (Directory.Exists(newFolderPath)) throw new IOException("Folder exists at destination path already.");
+
+        Directory.Move(folderPath, newFolderPath);
+    }
+    public Dictionary<string, TemplateModel> GetTemplates()
+    {
+        string templatePath = Path.Combine(GetConfigurationDirectoryPath(), "templates.json");
+        if (!File.Exists(templatePath)) throw new IOException($"templates.json does not exist. Maybe ${GetConfigurationDirectoryPath()} was not initialized?");
+
+        string templateJson = File.ReadAllText(templatePath);
+
+        TemplateManagerModel templateModels = JsonSerializer.Deserialize<TemplateManagerModel>(templateJson) ?? new([]);
+
+        return templateModels.Templates.ToDictionary(template => template.Name);
+    }
+    public void CreateTemplate(string chestPath, string templateName)
+    {
+        if (!Directory.Exists(chestPath) || !IsValidChest(chestPath)) throw new IOException("Chest is missing or invalid.");
+
+        Dictionary<string,TemplateModel> existingTemplates = GetTemplates();
+
+        if (existingTemplates.ContainsKey(templateName)) throw new ArgumentException("Given templateName cannot be the name of an existing template.");
+        
+        TemplateModel newTemplate = new(templateName, CreateFolderModel(chestPath, "."));
+
+        existingTemplates.Add(templateName, newTemplate);
+
+        string newTemplateJson = JsonSerializer.Serialize(new TemplateManagerModel([..existingTemplates.Values]));
+        File.WriteAllText(Path.Combine(GetConfigurationDirectoryPath(), "templates.json"), newTemplateJson);
+    }
+    public void WriteFolderModelStructure(string chestPath, string? subPath, FolderModel folder)
+    {
+        string createPath = chestPath;
+        if (!string.IsNullOrWhiteSpace(subPath)) createPath = Path.Combine(createPath, subPath);
+        foreach (var folderModel in folder.SubFolders)
+        {
+            Directory.CreateDirectory(Path.Combine(createPath, folderModel.Name));
+            WriteFolderModelStructure(chestPath, Path.Combine(subPath ?? "", createPath), folderModel);
+        }
+
+        foreach (var fileModel in folder.Files)
+        {
+            File.WriteAllBytes(Path.Combine(createPath, fileModel.Name), fileModel.Contents);
+        }
+    }
+    public FolderModel CreateFolderModel(string path, string folderName)
+    {
+        List<FolderModel> subFolders = [];
+        List<FileModel> files = [];
+        foreach(var folder in Directory.EnumerateDirectories(path))
+        {
+            subFolders.Add(CreateFolderModel(folder, Path.GetFileName(folder)));
+        }
+        foreach(var file in Directory.EnumerateFiles(path)) files.Add(new FileModel(Path.GetFileName(file), File.ReadAllBytes(file)));
+
+        return new FolderModel(folderName, [..subFolders], [..files]);
+    }
+    public byte[] ReadPdfData(string pdfPath)
+    {
+        if (!File.Exists(pdfPath)) throw new IOException("File does not exist.");
+        else if (GetFileType(pdfPath) != FileType.PDF) throw new IOException("File is not a PDF.");
+
+        return File.ReadAllBytes(pdfPath);
+    }
+    public void WritePdfData(string pdfPath, byte[] pdfData)
+    {
+        File.WriteAllBytes(pdfPath, pdfData);
     }
 }
