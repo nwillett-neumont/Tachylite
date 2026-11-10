@@ -171,6 +171,12 @@ public partial class EditorViewModel : ViewModelBase
                     {
                         new MenuItem()
                         {
+                            Header = "Rename Folder",
+                            Command = ToggleContextMenuRenameDialogCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        },
+                        new MenuItem()
+                        {
                             Header = "Create New Markdown File",
                             Command = ToggleContextMenuCreateMarkdownDialogCommand,
                             CommandParameter = Path.GetFullPath(item)
@@ -196,7 +202,22 @@ public partial class EditorViewModel : ViewModelBase
                     }
                 });
             }
-            else fileTreeButton.Command = ButtonFileCommand;
+            else
+            {
+                fileTreeButton.Command = ButtonFileCommand;
+                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
+                {
+                    Items =
+                    {
+                        new MenuItem()
+                        {
+                            Header = "Rename File",
+                            Command = RenameCommand,
+                            CommandParameter = Path.GetFullPath(item)
+                        },
+                    }
+                });
+            }
 
             FileTree.Add(fileTreeButton);
         }
@@ -214,6 +235,7 @@ public partial class EditorViewModel : ViewModelBase
         NewFilePathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsImportPdfDialogVisible = false;
+        IsRenameVisible = false;
         IsCreateMarkdownDialogVisible = !IsCreateMarkdownDialogVisible;
 
         NewFileName = NewFilePath = "";
@@ -254,6 +276,7 @@ public partial class EditorViewModel : ViewModelBase
         NewPdfPathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsCreateMarkdownDialogVisible = false;
+        IsRenameVisible = false;
         IsImportPdfDialogVisible = !IsImportPdfDialogVisible;
 
         ExistingPdfPath = NewPdfPath = "";
@@ -294,6 +317,7 @@ public partial class EditorViewModel : ViewModelBase
         NewFolderPathIsEnabled = true;
         IsCreateMarkdownDialogVisible = false;
         IsImportPdfDialogVisible = false;
+        IsRenameVisible = false;
         IsNewFolderDialogVisible = !IsNewFolderDialogVisible;
 
         NewFolderName = NewFolderPath = "";
@@ -459,5 +483,50 @@ public partial class EditorViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(CurrentTab));
         OnPropertyChanged(nameof(Tabs));
+    }
+
+    [ObservableProperty]
+    public partial string RenameNewName { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string RenamePath { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool RenameEntryIsEnabled { get; set; } = true;
+    [ObservableProperty]
+    public partial bool IsRenameVisible { get; set; } = true;
+    public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || !File.Exists(RenamePath);
+    public bool RenameDestinationPathIsInvalid => string.IsNullOrWhiteSpace(RenameNewName) || 
+            !(_validationService.ValidatePascalCase(RenameNewName) || _validationService.ValidatePascalCase(RenameNewName)) ||
+            File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
+
+    [RelayCommand]
+    public void ToggleContextMenuRenameDialog(string currentPath)
+    {
+        ToggleRenameDialog();
+        RenameEntryIsEnabled = false;
+        RenamePath = Path.GetRelativePath(ChestPath, currentPath);
+    }
+
+    [RelayCommand]
+    public void ToggleRenameDialog()
+    {
+        RenameEntryIsEnabled = true;
+        IsCreateMarkdownDialogVisible =  false;
+        IsNewFolderDialogVisible = false;
+        IsImportPdfDialogVisible = false;
+        IsRenameVisible = !IsRenameVisible;
+
+        RenameNewName = RenamePath = "";
+    }
+
+    [RelayCommand]
+    public void Rename()
+    {
+        if (RenamePathIsInvalid || RenameDestinationPathIsInvalid) return;
+
+        _fileSystemService.mo
+
+        PopulateFileTree();
     }
 }

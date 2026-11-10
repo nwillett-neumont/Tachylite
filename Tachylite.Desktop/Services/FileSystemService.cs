@@ -349,7 +349,10 @@ public class FileSystemService : IFileSystemService
 
         if (!File.Exists(filePath)) throw new IOException("File at given path does not exist.");
         else if (string.IsNullOrEmpty(newFilePath)) throw new IOException("The destination path is either null or inaccessible.");
-        else if (File.Exists(newFilePath)) throw new IOException("File exists at destination path already.");
+        
+        newFilePath = Path.Combine(newFilePath, newName);
+
+        if (File.Exists(newFilePath)) throw new IOException("File exists at destination path already.");
 
         File.Move(filePath, newFilePath);
     }
@@ -359,7 +362,10 @@ public class FileSystemService : IFileSystemService
 
         if (!Directory.Exists(folderPath)) throw new IOException("Folder at the given path does not exist.");
         else if (string.IsNullOrEmpty(newFolderPath)) throw new IOException("The destination path is either null or inaccessible.");
-        else if (Directory.Exists(newFolderPath)) throw new IOException("Folder exists at destination path already.");
+        
+        newFolderPath = Path.Combine(newFolderPath, newName);
+
+        if (Directory.Exists(newFolderPath)) throw new IOException("Folder exists at destination path already.");
 
         Directory.Move(folderPath, newFolderPath);
     }
