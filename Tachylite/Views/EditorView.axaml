@@ -91,13 +91,13 @@
       <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
           <TextBox Text="{Binding RenamePath}" PlaceholderText="Path to renamed item..." Classes.invalid="{Binding RenamePathIsInvalid}" IsEnabled="{Binding RenameEntryIsEnabled}"></TextBox>
-          <Button Content="Browse" Click="ButtonNewFolder_Click" IsEnabled="{Binding NewFolderPathIsEnabled}"/>
+          <Button Content="Browse" Click="ButtonNewFolder_Click" IsEnabled="{Binding RenameEntryIsEnabled}"/>
         </StackPanel>    
-        <TextBox Text="{Binding RenameNewName}" PlaceholderText="Name for the new folder..." Classes.invalid="{Binding DestinationPathIsRenameDestinationPathIsInvalid}" ></TextBox>
+        <TextBox Text="{Binding RenameNewName}" PlaceholderText="New name..." Classes.invalid="{Binding RenameDestinationPathIsInvalid}" ></TextBox>
         <StackPanel Orientation="Horizontal" Spacing="8"
             HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding Toggle}" />
-          <Button Content="Create" Command="{Binding Rename}" />
+          <Button Content="Cancel" Command="{Binding ToggleRenameDialog}" />
+          <Button Content="Rename" Command="{Binding Rename}" />
         </StackPanel>
       </StackPanel>
     </Border>

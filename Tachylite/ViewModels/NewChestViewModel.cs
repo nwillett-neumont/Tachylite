@@ -67,7 +67,7 @@ public partial class NewChestViewModel : ViewModelBase
 
         if (NameIsInvalid || CreatePathIsInvalid) return;
 
-        _fileSystemService.CreateNewChest(Name, NewChestPath);
+        _fileSystemService.CreateNewChest(Name, NewChestPath, null);
         _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
 
         EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path.Combine(NewChestPath, Name), _fileSystemService, _validationService) };

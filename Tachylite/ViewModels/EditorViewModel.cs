@@ -212,7 +212,7 @@ public partial class EditorViewModel : ViewModelBase
                         new MenuItem()
                         {
                             Header = "Rename File",
-                            Command = RenameCommand,
+                            Command = ToggleContextMenuRenameDialogCommand,
                             CommandParameter = Path.GetFullPath(item)
                         },
                     }
@@ -493,12 +493,15 @@ public partial class EditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool RenameEntryIsEnabled { get; set; } = true;
+
     [ObservableProperty]
-    public partial bool IsRenameVisible { get; set; } = true;
-    public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || !File.Exists(RenamePath);
+    public partial bool IsRenameVisible { get; set; } = false;
+    public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || 
+        !(Path.Exists(RenamePath) || Path.Exists(Path.Combine(ChestPath, RenamePath)));
     public bool RenameDestinationPathIsInvalid => string.IsNullOrWhiteSpace(RenameNewName) || 
-            !(_validationService.ValidatePascalCase(RenameNewName) || _validationService.ValidatePascalCase(RenameNewName)) ||
-            File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
+        !(_validationService.ValidatePascalCase(Path.GetFileNameWithoutExtension(RenameNewName)) || 
+        _validationService.ValidateSnakeCase(Path.GetFileNameWithoutExtension(RenameNewName))) ||
+        File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
 
     [RelayCommand]
     public void ToggleContextMenuRenameDialog(string currentPath)
@@ -524,8 +527,21 @@ public partial class EditorViewModel : ViewModelBase
     public void Rename()
     {
         if (RenamePathIsInvalid || RenameDestinationPathIsInvalid) return;
+        IsRenameVisible = false;
 
-        _fileSystemService.mo
+        if (!RenamePath.Contains(ChestPath)) RenamePath = Path.Combine(ChestPath, RenamePath);
+
+        if (Directory.Exists(RenamePath))
+        {
+            _fileSystemService.RenameFolder(RenamePath, RenameNewName);
+        } 
+        else
+        {
+            string fileExtension = Path.GetExtension(RenamePath);
+            if (RenameNewName.EndsWith(fileExtension)) RenameNewName = RenameNewName.Replace(fileExtension, "");
+            RenameNewName += fileExtension;
+            _fileSystemService.RenameFile(RenamePath, RenameNewName);
+        }
 
         PopulateFileTree();
     }
