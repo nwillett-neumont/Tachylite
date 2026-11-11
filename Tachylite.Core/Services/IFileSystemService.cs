@@ -15,8 +15,8 @@ public interface IFileSystemService
     public void CreateChestSubfolder(string chestPath, string? subfolder, string name);
     public void CreateMarkdownFile(string chestPath, string? subfolder, string name);
     public void ImportPdfFile(string chestPath, string? subfolder, string existingPdfPath);
-    public string[] GetChestContents(string chestPath);
-    public string[] GetFolderContents(string path);
+    public (string[], string[]) GetChestContents(string chestPath); // First string represent unhidden stuff, second is hidden stuff
+    public (string[], string[]) GetFolderContents(string path, bool isHidden); // First string represent unhidden stuff, second is hidden stuff
     public bool UserDocumentsDirectoryExists();
     public void CreateUserDocumentsDirectory();
     public string GetUserDocumentsDirectory();
