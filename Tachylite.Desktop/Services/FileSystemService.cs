@@ -100,7 +100,7 @@ public class FileSystemService : IFileSystemService
 
     private void CopySharedFolderToChest(string sharedDirectory, string chestPath)
     {
-        string[] contents = GetFolderContents(sharedDirectory);
+        string[] contents = GetFolderContents(sharedDirectory, false).Item1;
         foreach(var item in contents)
         {
             if (Directory.Exists(item)) Directory.CreateDirectory(Path.Combine(chestPath, Path.GetRelativePath(sharedDirectory, item)));
@@ -200,30 +200,51 @@ public class FileSystemService : IFileSystemService
         File.Copy(existingPdfPath, destinationPath);
     }
 
-    public string[] GetChestContents(string chestPath)
+    public (string[], string[]) GetChestContents(string chestPath)
     {
-        if (!IsValidChest(chestPath)) return [];
-        else return GetFolderContents(chestPath);
+        if (!IsValidChest(chestPath)) throw new IOException("Path supplied does not point to a valid chest.");
+        else return GetFolderContents(chestPath, false);
     }
 
-    public string[] GetFolderContents(string path)
+    public (string[], string[]) GetFolderContents(string path, bool isHidden)
     {
         List<string> folders = [.. Directory.EnumerateDirectories(path)];
         List<string> files = [.. Directory.EnumerateFiles(path)];
 
-        List<string> finalList = [];
+        List<string> finalShownList = [];
+        List<string> finalHiddenList = [];
 
         foreach(string folder in folders)
         {
-            if (folder.Contains(".chest")) continue;
-            finalList.Add(folder);
-            string[] subContents = GetFolderContents(folder);
-            if (subContents.Length > 0) finalList.AddRange(subContents);
+            if (Path.GetFileName(folder).StartsWith('.') || isHidden)
+            {
+                finalHiddenList.Add(folder);
+                (string[], string[]) subContents = GetFolderContents(folder, true);
+                if (subContents.Item1.Length > 0) finalHiddenList.AddRange(subContents.Item1);
+                if (subContents.Item2.Length > 0) finalHiddenList.AddRange(subContents.Item2);
+            }
+            else
+            {
+                finalShownList.Add(folder);
+                (string[], string[]) subContents = GetFolderContents(folder, isHidden);
+                if (subContents.Item1.Length > 0) finalShownList.AddRange(subContents.Item1);
+                if (subContents.Item2.Length > 0) finalHiddenList.AddRange(subContents.Item2);
+            }
         }
 
-        finalList.AddRange(files);
+        if (isHidden)
+        {
+            finalHiddenList.AddRange(files);
+            return ([.. finalShownList], [.. finalHiddenList]);
+        }
 
-        return [.. finalList];
+        foreach(string file in files)
+        {
+            if (Path.GetFileName(file).StartsWith('.') || isHidden) finalHiddenList.Add(file);
+            else finalShownList.Add(file);
+        }        
+
+        return ([.. finalShownList], [.. finalHiddenList]);
     }
 
     public bool UserDocumentsDirectoryExists()
