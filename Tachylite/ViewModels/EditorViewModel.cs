@@ -25,6 +25,8 @@ public partial class EditorViewModel : ViewModelBase
 
     public Window? CurrentWindow { get; set; }
 
+    private readonly bool ShowHidden = false;
+
     [ObservableProperty]
     public partial bool IsCreateMarkdownDialogVisible { get; set; } = false;
 
@@ -61,6 +63,13 @@ public partial class EditorViewModel : ViewModelBase
     public ObservableCollection<Button> FileTree { get; set; } = [];
     public ObservableCollection<TabItem> Tabs { get; set; } = [];
 
+    
+    [ObservableProperty]
+    public partial string RenameNewName { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string RenamePath { get; set; } = "";
+
     public EditorViewModel(string chestPath, IFileSystemService fileSystemService, IValidationService validationService)
     {
         ChestPath = chestPath;
@@ -86,11 +95,18 @@ public partial class EditorViewModel : ViewModelBase
         _validationService.ValidateSnakeCase(NewFolderName)) ||
         !_validationService.UsesValidCharacters(NewFolderName));
 
+    public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || 
+        !(Path.Exists(RenamePath) || Path.Exists(Path.Combine(ChestPath, RenamePath)));
+
     public bool NewFilePathDoesNotExistInChest => NewFilePathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewFilePath));
 
     public bool NewPdfPathDoesNotExistInChest => PdfPathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewPdfPath));
 
     public bool NewFolderPathDoesNotExistInChest => NewFolderPathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewFolderPath));
+    public bool RenameDestinationPathIsInvalid => string.IsNullOrWhiteSpace(RenameNewName) || 
+        !(_validationService.ValidatePascalCase(Path.GetFileNameWithoutExtension(RenameNewName)) || 
+        _validationService.ValidateSnakeCase(Path.GetFileNameWithoutExtension(RenameNewName))) ||
+        File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FileNameIsInvalid))]
@@ -125,11 +141,27 @@ public partial class EditorViewModel : ViewModelBase
     [ObservableProperty]
     public partial bool NewFolderPathIsEnabled { get; set; } = true;
 
+    [ObservableProperty]
+    public partial bool RenameEntryIsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsRenameVisible { get; set; } = false;
+
     public void PopulateFileTree()
     {
         FileTree = [];
-        string[] chestContents = _fileSystemService.GetChestContents(ChestPath);
-        foreach (string item in chestContents)
+        (string[] Shown, string[] Hidden) = _fileSystemService.GetChestContents(ChestPath);
+        
+        AddContentToFileTree(Shown);
+
+        if (ShowHidden) AddContentToFileTree(Hidden);
+        
+        OnPropertyChanged(nameof(FileTree));
+    }
+
+    private void AddContentToFileTree(string[] contents)
+    {
+        foreach (string item in contents)
         {
             int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 12;
 
@@ -221,7 +253,6 @@ public partial class EditorViewModel : ViewModelBase
 
             FileTree.Add(fileTreeButton);
         }
-        OnPropertyChanged(nameof(FileTree));
     }
 
     public void ShowDiceRoller()
@@ -347,6 +378,49 @@ public partial class EditorViewModel : ViewModelBase
         NewFolderName = NewFolderPath = "";
         IsNewFolderDialogVisible = false;
         NewFolderNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
+        PopulateFileTree();
+    }
+
+    [RelayCommand]
+    public void ToggleRenameDialog()
+    {
+        RenameEntryIsEnabled = true;
+        IsCreateMarkdownDialogVisible =  false;
+        IsNewFolderDialogVisible = false;
+        IsImportPdfDialogVisible = false;
+        IsRenameVisible = !IsRenameVisible;
+
+        RenameNewName = RenamePath = "";
+    }
+
+    [RelayCommand]
+    public void ToggleContextMenuRenameDialog(string currentPath)
+    {
+        ToggleRenameDialog();
+        RenameEntryIsEnabled = false;
+        RenamePath = Path.GetRelativePath(ChestPath, currentPath);
+    }
+
+    [RelayCommand]
+    public void Rename()
+    {
+        if (RenamePathIsInvalid || RenameDestinationPathIsInvalid) return;
+        IsRenameVisible = false;
+
+        if (!RenamePath.Contains(ChestPath)) RenamePath = Path.Combine(ChestPath, RenamePath);
+
+        if (Directory.Exists(RenamePath))
+        {
+            _fileSystemService.RenameFolder(RenamePath, RenameNewName);
+        } 
+        else
+        {
+            string fileExtension = Path.GetExtension(RenamePath);
+            if (RenameNewName.EndsWith(fileExtension)) RenameNewName = RenameNewName.Replace(fileExtension, "");
+            RenameNewName += fileExtension;
+            _fileSystemService.RenameFile(RenamePath, RenameNewName);
+        }
+
         PopulateFileTree();
     }
 
@@ -485,64 +559,4 @@ public partial class EditorViewModel : ViewModelBase
         OnPropertyChanged(nameof(Tabs));
     }
 
-    [ObservableProperty]
-    public partial string RenameNewName { get; set; } = "";
-
-    [ObservableProperty]
-    public partial string RenamePath { get; set; } = "";
-
-    [ObservableProperty]
-    public partial bool RenameEntryIsEnabled { get; set; } = true;
-
-    [ObservableProperty]
-    public partial bool IsRenameVisible { get; set; } = false;
-    public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || 
-        !(Path.Exists(RenamePath) || Path.Exists(Path.Combine(ChestPath, RenamePath)));
-    public bool RenameDestinationPathIsInvalid => string.IsNullOrWhiteSpace(RenameNewName) || 
-        !(_validationService.ValidatePascalCase(Path.GetFileNameWithoutExtension(RenameNewName)) || 
-        _validationService.ValidateSnakeCase(Path.GetFileNameWithoutExtension(RenameNewName))) ||
-        File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
-
-    [RelayCommand]
-    public void ToggleContextMenuRenameDialog(string currentPath)
-    {
-        ToggleRenameDialog();
-        RenameEntryIsEnabled = false;
-        RenamePath = Path.GetRelativePath(ChestPath, currentPath);
-    }
-
-    [RelayCommand]
-    public void ToggleRenameDialog()
-    {
-        RenameEntryIsEnabled = true;
-        IsCreateMarkdownDialogVisible =  false;
-        IsNewFolderDialogVisible = false;
-        IsImportPdfDialogVisible = false;
-        IsRenameVisible = !IsRenameVisible;
-
-        RenameNewName = RenamePath = "";
-    }
-
-    [RelayCommand]
-    public void Rename()
-    {
-        if (RenamePathIsInvalid || RenameDestinationPathIsInvalid) return;
-        IsRenameVisible = false;
-
-        if (!RenamePath.Contains(ChestPath)) RenamePath = Path.Combine(ChestPath, RenamePath);
-
-        if (Directory.Exists(RenamePath))
-        {
-            _fileSystemService.RenameFolder(RenamePath, RenameNewName);
-        } 
-        else
-        {
-            string fileExtension = Path.GetExtension(RenamePath);
-            if (RenameNewName.EndsWith(fileExtension)) RenameNewName = RenameNewName.Replace(fileExtension, "");
-            RenameNewName += fileExtension;
-            _fileSystemService.RenameFile(RenamePath, RenameNewName);
-        }
-
-        PopulateFileTree();
-    }
 }
