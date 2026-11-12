@@ -23,7 +23,7 @@ public partial class MarkdownEditorViewModel : ViewModelBase
     public readonly string FilePath;
 
     [ObservableProperty]
-    public partial string EditorText { get; set; }
+    public partial string EditorText { get; set; } = "";
 
     public string CurrentFileContent { get; set; }
 
@@ -45,8 +45,6 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _validationService = validationService;
         _markdownService = markdownService;
         _undoService = undoService;
-
-        EditorText = PopulateEditor() ?? "";
         CurrentFileContent = EditorText;
 
         _saveTimer = new(TimeSpan.FromMilliseconds(TIMER_DELAY));
@@ -56,12 +54,12 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _ = Task.Run(StartTimer);
     }
 
-    public string PopulateEditor()
+    public async void PopulateEditor()
     {
         if (!File.Exists(FilePath)) throw new IOException("The file path does not exist.");
         else if (_fileSystemService.GetFileType(FilePath) != FileType.MD) throw new IOException("The file is not a markdown file.");
 
-        return _fileSystemService.GetMarkdownFileContents(FilePath);
+        EditorText = await _fileSystemService.GetMarkdownFileContentsAsync(FilePath);
     }
 
     partial void OnEditorTextChanged(string value)

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
 
@@ -308,8 +310,13 @@ public class FileSystemService : IFileSystemService
     public string GetMarkdownFileContents(string filePath)
     {
         if (!File.Exists(filePath)) throw new IOException("filePath must point to an existing file");
-
         return File.ReadAllText(filePath);
+    }
+
+    public Task<string> GetMarkdownFileContentsAsync(string filePath)
+    {
+        if (!File.Exists(filePath)) throw new IOException("filePath must point to an existing file");
+        return File.ReadAllTextAsync(filePath);
     }
 
     public void CreateUserFileBackup(string filePath)
