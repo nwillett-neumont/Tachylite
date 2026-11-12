@@ -1,7 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Markup.Xaml.Templates;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Tachylite.Core.Models;
 using Tachylite.Core.Services;
 using Tachylite.Views;
 
@@ -29,6 +34,12 @@ public partial class NewChestViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(CreatePathIsInvalid))]
     public partial string NewChestPath { get; set; } = "";
 
+    private Dictionary<string, TemplateModel> Templates => _fileSystemService.GetTemplates();
+
+    public ObservableCollection<string> TemplateNames => ["None",..Templates.Keys];
+
+    [ObservableProperty]
+    public partial string SelectedTemplate { get; set; } = "";
     public NewChestViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
     {
         Recents = recents;
@@ -41,11 +52,13 @@ public partial class NewChestViewModel : ViewModelBase
 
     public bool CharactersAreValid => !string.IsNullOrWhiteSpace(Name) && _validationService.UsesValidCharacters(Name);
 
+    public bool ChestNameTaken =>  Path.Exists(Path.Combine(NewChestPath, Name));
+
     public bool CreatePathIsInvalid => CreatePathHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewChestPath) ||
-        !Path.Exists(NewChestPath) || Path.Exists(Path.Combine(NewChestPath, Name)));
+        !Path.Exists(NewChestPath));
 
-    public bool NameIsInvalid => NameHasBeenAttempted && (!NamingConventionIsValid || !CharactersAreValid);
+    public bool NameIsInvalid => NameHasBeenAttempted && (!NamingConventionIsValid || !CharactersAreValid || ChestNameTaken);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NameIsInvalid))]
@@ -67,8 +80,16 @@ public partial class NewChestViewModel : ViewModelBase
 
         if (NameIsInvalid || CreatePathIsInvalid) return;
 
-        _fileSystemService.CreateNewChest(Name, NewChestPath, null);
-        _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
+        if (string.IsNullOrWhiteSpace(SelectedTemplate) || SelectedTemplate.Equals("None"))
+        {
+            _fileSystemService.CreateNewChest(Name, NewChestPath, null);
+            _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
+        }
+        else
+        {
+            _fileSystemService.CreateNewChest(Name, NewChestPath, Templates[SelectedTemplate]);
+            _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
+        }
 
         EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path.Combine(NewChestPath, Name), _fileSystemService, _validationService) };
         editorWindow.Show();

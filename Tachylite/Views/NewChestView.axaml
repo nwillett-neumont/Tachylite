@@ -28,6 +28,8 @@
         Classes.invalid="{Binding CreatePathIsInvalid}" />
       <Button Content="Browse" Click="BrowseButton_Click"></Button>
     </StackPanel>
+    <ComboBox ItemsSource="{Binding TemplateNames}" SelectedIndex="0" SelectedValue="{Binding SelectedTemplate}" MaxDropDownHeight="200">
+    </ComboBox>
     <StackPanel Orientation="Horizontal"
       VerticalAlignment="Center"
       HorizontalAlignment="Center"
