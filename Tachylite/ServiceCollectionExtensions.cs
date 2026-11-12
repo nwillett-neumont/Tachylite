@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         collection.AddTransient<IValidationService, ValidationService>();
         collection.AddTransient<IUndoService, UndoService>();
         collection.AddTransient<IDiceRollerService, DiceRollerService>();
+        collection.AddSingleton<IPdfService, PdfService>();
         collection.AddTransient<DiceRollerViewModel>();
     }
 }

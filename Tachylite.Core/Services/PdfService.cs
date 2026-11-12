@@ -28,7 +28,7 @@ public class PdfService : IPdfService
             Pages = [..pages]
         };
     }
-
+    
     public PdfPageModel ConstructPdfPageModel(Page page, PdfPageBackgroundImageType backgroundImageType)
     {
         List<PdfTextElementModel> textElements = [];
@@ -42,12 +42,18 @@ public class PdfService : IPdfService
             textElements.Add(ConstructPdfTextElementModel(textFragment));
         }
 
+        for (var i = textAbsorber.TextFragments.Count; i >= 1; i--)
+        {
+            textAbsorber.TextFragments.Remove(textAbsorber.TextFragments[i]);
+        }
+
         ImagePlacementAbsorber imagePlacementAbsorber = new();
         page.Accept(imagePlacementAbsorber);
 
         foreach(var imagePlacement in imagePlacementAbsorber.ImagePlacements)
         {
             imageElements.Add(ConstructPdfImageElementModel(imagePlacement));
+            imagePlacement.Hide();
         }
 
         byte[] backgroundImage;

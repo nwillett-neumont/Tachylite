@@ -581,7 +581,7 @@ public partial class EditorViewModel : ViewModelBase
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8
                     };
-                tab.Content = new PdfEditorView() { DataContext = new PdfEditorViewModel(filePath) };
+                tab.Content = new PdfEditorView() { DataContext = new PdfEditorViewModel(_fileSystemService, App.Services.GetService<IPdfService>(), filePath, PdfPageBackgroundImageType.Vector) };
                 break;
             default:
                 tab = new()
