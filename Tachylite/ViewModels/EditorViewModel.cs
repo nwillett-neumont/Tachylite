@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Input.TextInput;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +34,12 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool IsNewFolderDialogVisible { get; set; } = false;
 
     [ObservableProperty]
+    public partial bool IsRenameDialogVisible { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsNewTemplateVisible { get; set; } = false;
+
+    [ObservableProperty]
     public partial bool DisplayDiceRoller { get; set; } = false;
 
     [ObservableProperty]
@@ -58,17 +61,19 @@ public partial class EditorViewModel : ViewModelBase
     public partial string NewFolderPath { get; set; } = "";
 
     [ObservableProperty]
-    public partial TabItem? CurrentTab { get; set; }
-
-    public ObservableCollection<Button> FileTree { get; set; } = [];
-    public ObservableCollection<TabItem> Tabs { get; set; } = [];
-
-    
-    [ObservableProperty]
     public partial string RenameNewName { get; set; } = "";
 
     [ObservableProperty]
     public partial string RenamePath { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string NewTemplateName { get; set; } = "";
+
+    [ObservableProperty]
+    public partial TabItem? CurrentTab { get; set; }
+
+    public ObservableCollection<Button> FileTree { get; set; } = [];
+    public ObservableCollection<TabItem> Tabs { get; set; } = [];
 
     public EditorViewModel(string chestPath, IFileSystemService fileSystemService, IValidationService validationService)
     {
@@ -108,6 +113,12 @@ public partial class EditorViewModel : ViewModelBase
         _validationService.ValidateSnakeCase(Path.GetFileNameWithoutExtension(RenameNewName))) ||
         File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
 
+    public bool NewTemplateNameIsInvalid => NewTemplateNameHasBeenAttempted && 
+        (string.IsNullOrWhiteSpace(NewTemplateName) ||
+        NewTemplateName.Contains(' ') ||
+        NewTemplateName.Equals("None") ||
+        _fileSystemService.GetTemplates().ContainsKey(NewTemplateName));
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FileNameIsInvalid))]
     public partial bool NewFileNameHasBeenAttempted { get; set; } = false;
@@ -133,6 +144,9 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool NewFolderPathHasBeenAttempted { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NewTemplateNameIsInvalid))]
+    public partial bool NewTemplateNameHasBeenAttempted { get; set; } = true; //false
+    [ObservableProperty]
     public partial bool NewFilePathIsEnabled { get; set; } = true;
 
     [ObservableProperty]
@@ -143,9 +157,6 @@ public partial class EditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool RenameEntryIsEnabled { get; set; } = true;
-
-    [ObservableProperty]
-    public partial bool IsRenameVisible { get; set; } = false;
 
     public void PopulateFileTree()
     {
@@ -266,7 +277,7 @@ public partial class EditorViewModel : ViewModelBase
         NewFilePathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsImportPdfDialogVisible = false;
-        IsRenameVisible = false;
+        IsRenameDialogVisible = false;
         IsCreateMarkdownDialogVisible = !IsCreateMarkdownDialogVisible;
 
         NewFileName = NewFilePath = "";
@@ -307,7 +318,7 @@ public partial class EditorViewModel : ViewModelBase
         NewPdfPathIsEnabled = true;
         IsNewFolderDialogVisible = false;
         IsCreateMarkdownDialogVisible = false;
-        IsRenameVisible = false;
+        IsRenameDialogVisible = false;
         IsImportPdfDialogVisible = !IsImportPdfDialogVisible;
 
         ExistingPdfPath = NewPdfPath = "";
@@ -348,7 +359,7 @@ public partial class EditorViewModel : ViewModelBase
         NewFolderPathIsEnabled = true;
         IsCreateMarkdownDialogVisible = false;
         IsImportPdfDialogVisible = false;
-        IsRenameVisible = false;
+        IsRenameDialogVisible = false;
         IsNewFolderDialogVisible = !IsNewFolderDialogVisible;
 
         NewFolderName = NewFolderPath = "";
@@ -388,7 +399,7 @@ public partial class EditorViewModel : ViewModelBase
         IsCreateMarkdownDialogVisible =  false;
         IsNewFolderDialogVisible = false;
         IsImportPdfDialogVisible = false;
-        IsRenameVisible = !IsRenameVisible;
+        IsRenameDialogVisible = !IsRenameDialogVisible;
 
         RenameNewName = RenamePath = "";
     }
@@ -405,7 +416,10 @@ public partial class EditorViewModel : ViewModelBase
     public void Rename()
     {
         if (RenamePathIsInvalid || RenameDestinationPathIsInvalid) return;
-        IsRenameVisible = false;
+
+        OnPropertyChanged(nameof(RenamePathIsInvalid));
+        OnPropertyChanged(nameof(RenameDestinationPathIsInvalid));
+        IsRenameDialogVisible = false;
 
         if (!RenamePath.Contains(ChestPath)) RenamePath = Path.Combine(ChestPath, RenamePath);
 
@@ -422,6 +436,32 @@ public partial class EditorViewModel : ViewModelBase
         }
 
         PopulateFileTree();
+    }
+
+    [RelayCommand]
+    public void ToggleTemplateDialog()
+    {
+        
+        RenameEntryIsEnabled = false;
+        IsCreateMarkdownDialogVisible =  false;
+        IsNewFolderDialogVisible = false;
+        IsImportPdfDialogVisible = false;
+        IsNewTemplateVisible = !IsNewTemplateVisible;
+
+        NewTemplateName = Path.GetFileName(ChestPath);
+        OnPropertyChanged(nameof(NewTemplateNameIsInvalid));
+    }
+
+    [RelayCommand]
+    public void CreateTemplate()
+    {
+        // NewTemplateNameHasBeenAttempted = true;
+        if (NewTemplateNameIsInvalid) return;
+
+        _fileSystemService.CreateTemplate(ChestPath, NewTemplateName);
+        OnPropertyChanged(nameof(NewTemplateNameIsInvalid));
+
+        IsNewTemplateVisible = false;
     }
 
     public void CloseChest()

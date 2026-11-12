@@ -5,8 +5,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Aspose.Pdf.Operators;
-using Avalonia.Markup.Xaml.Templates;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
 
@@ -418,12 +416,17 @@ public class FileSystemService : IFileSystemService
     }
     public void WriteFolderModelStructure(string chestPath, string? subPath, FolderModel folder)
     {
+        if (string.IsNullOrWhiteSpace(chestPath)) throw new ArgumentException("chestPath cannot be null or whitespace.");
+        else if (subPath?.IsWhiteSpace() == true) throw new ArgumentException("subPath cannot contain only whitespace.");
+        else if (subPath?.Contains("..") == true) throw new ArgumentException("Subpath cannot escape to parent path.");
+
         string createPath = chestPath;
         if (!string.IsNullOrWhiteSpace(subPath)) createPath = Path.Combine(createPath, subPath);
         foreach (var folderModel in folder.SubFolders)
         {
+            if (string.IsNullOrWhiteSpace(folderModel.Name) || folderModel.Name.Contains("..")) continue;
             Directory.CreateDirectory(Path.Combine(createPath, folderModel.Name));
-            WriteFolderModelStructure(chestPath, Path.Combine(subPath ?? "", createPath), folderModel);
+            WriteFolderModelStructure(chestPath, Path.Combine(subPath ?? "", folderModel.Name), folderModel);
         }
 
         foreach (var fileModel in folder.Files)

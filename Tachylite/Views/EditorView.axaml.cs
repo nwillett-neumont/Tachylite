@@ -47,6 +47,7 @@ public partial class EditorView : UserControl
             if (pathIsValid && kind.Equals("new_file")) newFilePath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
             else if (pathIsValid && kind.Equals("import_pdf_destination")) newPdfPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
             else if (pathIsValid && kind.Equals("new_folder")) newFolderPath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
+            else if (pathIsValid && kind.Equals("rename")) renamePath.Text = Path.GetRelativePath((DataContext as EditorViewModel)!.ChestPath, path);
         }
     }
 
@@ -89,4 +90,9 @@ public partial class EditorView : UserControl
     {
         _ = OpenFolderPicker("new_folder");
     }    
+
+    private void ButtonRename_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        _ = OpenFolderPicker("rename");
+    }
 }   
