@@ -1,13 +1,12 @@
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
-using Tachylite.Tests.Core.Services;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
@@ -17,6 +16,10 @@ public partial class EditorViewModel : ViewModelBase
     private readonly IFileSystemService _fileSystemService;
 
     private readonly IValidationService _validationService;
+    private readonly Func<string, MarkdownEditorViewModel> _markdownEditorViewModelFactory;
+    private readonly Func<string, PdfEditorViewModel> _pdfEditorViewModelFactory;
+    private readonly Func<HomeWindowViewModel> _homeWindowViewModelFactory;
+    public DiceRollerViewModel DiceRoller { get; }
 
     public string ChestPath { get; set; }
 
@@ -75,11 +78,15 @@ public partial class EditorViewModel : ViewModelBase
     public ObservableCollection<Button> FileTree { get; set; } = [];
     public ObservableCollection<TabItem> Tabs { get; set; } = [];
 
-    public EditorViewModel(string chestPath, IFileSystemService fileSystemService, IValidationService validationService)
+    public EditorViewModel(IFileSystemService fileSystemService, IValidationService validationService, Func<string, MarkdownEditorViewModel> markdownEditorViewModelFactory, Func<string, PdfEditorViewModel> pdfEditorViewModelFactory, Func<HomeWindowViewModel> homeWindowViewModelFactory, DiceRollerViewModel diceRollerViewModel, string chestPath)
     {
-        ChestPath = chestPath;
         _fileSystemService = fileSystemService;
         _validationService = validationService;
+        _markdownEditorViewModelFactory = markdownEditorViewModelFactory;
+        _pdfEditorViewModelFactory = pdfEditorViewModelFactory;
+        DiceRoller = diceRollerViewModel;
+        _homeWindowViewModelFactory = homeWindowViewModelFactory;
+        ChestPath = chestPath;
         PopulateFileTree();
     }
 
@@ -466,7 +473,7 @@ public partial class EditorViewModel : ViewModelBase
 
     public void CloseChest()
     {
-        HomeWindow home = new() { DataContext = new HomeWindowViewModel(_fileSystemService.GetRecents(), _fileSystemService, _validationService) };
+        HomeWindow home = new() { DataContext = _homeWindowViewModelFactory.Invoke() };
         home.Show();
         CurrentWindow?.Close();
     }
@@ -550,7 +557,7 @@ public partial class EditorViewModel : ViewModelBase
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8
                     };
-                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath, _fileSystemService, _validationService, App.Services!.GetRequiredService<IMarkdownService>(), App.Services!.GetRequiredService<IUndoService>()) };
+                tab.Content = new MarkdownEditorView() { DataContext = _markdownEditorViewModelFactory.Invoke(filePath) };
                 
                 break;
             case FileType.PDF:
@@ -581,7 +588,7 @@ public partial class EditorViewModel : ViewModelBase
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8
                     };
-                tab.Content = new PdfEditorView() { DataContext = new PdfEditorViewModel(_fileSystemService, App.Services.GetService<IPdfService>(), filePath, PdfPageBackgroundImageType.Vector) };
+                tab.Content = new PdfEditorView() { DataContext = _pdfEditorViewModelFactory.Invoke(filePath) };
                 break;
             default:
                 tab = new()
@@ -598,5 +605,4 @@ public partial class EditorViewModel : ViewModelBase
         OnPropertyChanged(nameof(CurrentTab));
         OnPropertyChanged(nameof(Tabs));
     }
-
 }

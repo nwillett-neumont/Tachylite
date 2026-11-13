@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Tachylite.ViewModels;
 
@@ -47,7 +45,7 @@ public partial class HomeView : UserControl
         {
             Title = "Open Chest Folder",
             AllowMultiple = false,
-            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as HomeViewModel)?._fileSystemService.GetUserDocumentsDirectory() ?? "")
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as HomeViewModel)?.GetUserDocumentsDirectory() ?? "")
         });
 
         if (chestFolder.Count > 0)

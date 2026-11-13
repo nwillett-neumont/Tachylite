@@ -3,25 +3,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using Avalonia.Markup.Xaml.Templates;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
+using Tachylite.Factories;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
 
-public partial class NewChestViewModel : ViewModelBase
+public partial class NewChestViewModel(IFileSystemService fileSystemService, IValidationService validationService, EditorViewModelFactory editorViewModelFactory) : ViewModelBase
 {
     public Action? ToHomeView;
-    private readonly IFileSystemService _fileSystemService;
+    private readonly IFileSystemService _fileSystemService = fileSystemService;
 
-    private readonly IValidationService _validationService;
-    
-    public string[] Recents;
+    private readonly IValidationService _validationService = validationService;
 
-    public Window CurrentWindow { get; set; }
+    private readonly EditorViewModelFactory _editorViewModelFactory = editorViewModelFactory;
+
+    public Window? CurrentWindow { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NameIsInvalid))]
@@ -40,12 +39,6 @@ public partial class NewChestViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string SelectedTemplate { get; set; } = "";
-    public NewChestViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
-    {
-        Recents = recents;
-        _fileSystemService = fileSystemService;
-        _validationService = validationService;
-    }
 
     public bool NamingConventionIsValid => !string.IsNullOrWhiteSpace(Name) &&
         (_validationService.ValidatePascalCase(Name) || _validationService.ValidateSnakeCase(Name));
@@ -91,10 +84,10 @@ public partial class NewChestViewModel : ViewModelBase
             _fileSystemService.AddRecent(Path.Combine(NewChestPath, Name));
         }
 
-        EditorWindow editorWindow = new() { DataContext = new EditorViewModel(Path.Combine(NewChestPath, Name), _fileSystemService, _validationService) };
+        EditorWindow editorWindow = new() { DataContext = _editorViewModelFactory.CreateEditorViewModel(Path.Combine(NewChestPath, Name))};
         editorWindow.Show();
 
-        CurrentWindow.Close();
+        CurrentWindow?.Close();
     }
     
     public void CancelCreate()
@@ -102,5 +95,10 @@ public partial class NewChestViewModel : ViewModelBase
         ToHomeView?.Invoke();
         Name = NewChestPath = "";
         NameHasBeenAttempted = CreatePathHasBeenAttempted = false;
+    }
+
+    public string GetUserDocumentsDirectory()
+    {
+        return _fileSystemService.GetUserDocumentsDirectory();
     }
 }

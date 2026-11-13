@@ -51,6 +51,8 @@ public partial class MarkdownEditorViewModel : ViewModelBase
         _cancellationToken = new();
         _locker = new();
 
+        PopulateEditor();
+
         _ = Task.Run(StartTimer);
     }
 
