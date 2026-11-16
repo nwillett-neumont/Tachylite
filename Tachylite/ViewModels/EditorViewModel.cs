@@ -442,6 +442,21 @@ public partial class EditorViewModel : ViewModelBase
             _fileSystemService.RenameFile(RenamePath, RenameNewName);
         }
 
+        var existingTab = Tabs.FirstOrDefault(tab => ((tab.Header as StackPanel)!.Children[0] as TextBlock)!.Text!.Equals(Path.GetFileName(RenamePath)));
+
+        FileType fileType = _fileSystemService.GetFileType(RenameNewName);
+
+        var newTab = CreateTab(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName), fileType);
+
+        Tabs.Add(newTab);
+
+        if (CurrentTab?.Equals(existingTab) ?? false) CurrentTab = newTab;
+
+        if (existingTab != null) Tabs.Remove(existingTab);
+
+        OnPropertyChanged(nameof(CurrentTab));
+        OnPropertyChanged(nameof(Tabs));
+
         PopulateFileTree();
     }
 
@@ -502,7 +517,7 @@ public partial class EditorViewModel : ViewModelBase
     [RelayCommand]
     public void ButtonFile(string filePath)
     {
-        TabItem tab = new();
+        
         FileType fileType = _fileSystemService.GetFileType(filePath);
 
         TabItem? existingTab = null;
@@ -527,6 +542,19 @@ public partial class EditorViewModel : ViewModelBase
             return;
         }
         
+        TabItem tab = CreateTab(filePath, fileType);
+
+        Tabs.Add(tab);
+        CurrentTab = tab;
+
+        OnPropertyChanged(nameof(CurrentTab));
+        OnPropertyChanged(nameof(Tabs));
+    }
+
+    private TabItem CreateTab(string filePath, FileType fileType)
+    {
+        TabItem tab = new();
+
         switch(fileType)
         {
             case FileType.MD:
@@ -598,11 +626,6 @@ public partial class EditorViewModel : ViewModelBase
                 };
                 break;
         }
-
-        Tabs.Add(tab);
-        CurrentTab = tab;
-
-        OnPropertyChanged(nameof(CurrentTab));
-        OnPropertyChanged(nameof(Tabs));
+        return tab;
     }
 }
