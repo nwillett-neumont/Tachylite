@@ -65,6 +65,8 @@ public partial class HomeViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(path) || !_fileSystemService.IsValidChest(path)) return;
 
+        _fileSystemService.AddRecent(Path.GetFullPath(path));
+
         EditorWindow editorWindow = new() { DataContext = _editorViewModelFactory.CreateEditorViewModel(path) };
         editorWindow.Show();
         CurrentWindow?.Close();
@@ -79,11 +81,9 @@ public partial class HomeViewModel : ViewModelBase
 
         if (OpenPathIsInvalid) return;
 
-        _fileSystemService.AddRecent(Path.GetDirectoryName(Path.GetFullPath(OpenPath))!);
+        OpenPath = Path.GetDirectoryName(OpenPath) ?? throw new IOException("OpenPath cannot be null or root.");
 
-        EditorWindow editorWindow = new() { DataContext = _editorViewModelFactory.CreateEditorViewModel(OpenPath) };
-        editorWindow.Show();
-        CurrentWindow?.Close();
+        LoadChest(OpenPath);
     }
 
     public void NewChest()
