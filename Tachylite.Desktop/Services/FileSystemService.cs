@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Aspose.Pdf.Operators;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
 
@@ -112,27 +113,28 @@ public class FileSystemService : IFileSystemService
     {
         if (path.Contains('\\')) path = path.Replace('\\', Path.DirectorySeparatorChar);
         if (path.Contains('/')) path = path.Replace('/', Path.DirectorySeparatorChar);
+        path = Path.GetFullPath(path);
         RecentFileList recents = new()
         {
             Recents = GetRecents()
         };
-
-        if (recents.Recents.Contains(Path.GetFullPath(path))) return;
-
         if (recents.Recents.Length < 1)
         {
             recents.Recents = [path];
-        } else
+        }
+        else
         {
-            string[] newRecents = new string[recents.Recents.Length + 1];
-            recents.Recents.CopyTo(newRecents);
-            recents.Recents = newRecents;
-        
-            for (int i = recents.Recents.Length - 1; i > 0; i--)
+            Stack<string> trackedRecents = [];
+            
+            for (int i = recents.Recents.Length - 1; i >= 0; i--)
             {
-                recents.Recents[i] = recents.Recents[i - 1];
+                if (!trackedRecents.Contains(recents.Recents[i]) && !recents.Recents[i].Equals(path) && recents.Recents[i] != null)
+                {
+                    trackedRecents.Push(recents.Recents[i]);
+                }
             } 
-            recents.Recents[0] = path;
+            trackedRecents.Push(path);
+            recents.Recents = [..trackedRecents];
         }
 
         string newRecentsContent = JsonSerializer.Serialize(recents);
@@ -313,10 +315,25 @@ public class FileSystemService : IFileSystemService
         return File.ReadAllText(filePath);
     }
 
-    public Task<string> GetMarkdownFileContentsAsync(string filePath)
+    public async Task<string> GetMarkdownFileContentsAsync(string filePath)
     {
         if (!File.Exists(filePath)) throw new IOException("filePath must point to an existing file");
-        return File.ReadAllTextAsync(filePath);
+
+        byte maxAttempts = 10;
+
+        for (; maxAttempts >= 0; maxAttempts--)
+        {
+            try
+            {
+                return await File.ReadAllTextAsync(filePath);
+            }
+            catch(IOException)
+            {
+                if (maxAttempts == 0) throw;
+            }
+        }
+
+        return "";
     }
 
     public void CreateUserFileBackup(string filePath)
