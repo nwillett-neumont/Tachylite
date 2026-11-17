@@ -27,21 +27,22 @@
   <!-- StackPanel that holds everything -->
   <Grid>
     <!-- Outermost grid that holds all of the stuff on the page -->
-    <Grid HorizontalAlignment="Stretch" RowDefinitions="5*, Auto, 15*" >
+    <Grid HorizontalAlignment="Stretch" RowDefinitions="Auto, *, Auto" >
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="15*" MinWidth="190" />
         <ColumnDefinition Width="1" />
         <ColumnDefinition Width="85*" MinWidth="190" />
       </Grid.ColumnDefinitions>
+
       <!-- Top Controls -->
       <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Spacing="8" Grid.Column="0" Grid.Row="0">
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleCreateMarkdownDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-note.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleImportPdfDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/import-pdf.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleNewFolderDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-folder.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ShowDiceRoller}"><Image Source="{SvgImage avares://Tachylite/Assets/die-icon.svg}" /></Button>
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleCreateMarkdownDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-note-dark.svg}" /></Button>
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleImportPdfDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/import-pdf-dark.svg}" /></Button>
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleNewFolderDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-folder-dark.svg}" /></Button>
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ShowDiceRoller}"><Image Source="{SvgImage avares://Tachylite/Assets/die-icon-dark.svg}" /></Button>
       </StackPanel>
       <!-- FileTree -->
-      <ScrollViewer Name="FileTree" VerticalAlignment="Top" Grid.Column="0" Grid.Row="1">
+      <ScrollViewer VerticalAlignment="Stretch" Background="Transparent" Grid.Column="0" Grid.Row="1">
         <ScrollViewer.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Create New Markdown File"
@@ -55,25 +56,26 @@
                       CommandParameter="{Binding ChestPath}"  />
           </ContextMenu>
         </ScrollViewer.ContextMenu>
-        <ItemsControl ItemsSource="{Binding FileTree}" MaxWidth="200" HorizontalAlignment="Left"></ItemsControl>
+        <ItemsControl ItemsSource="{Binding FileTree}" VerticalAlignment="Stretch" HorizontalAlignment="Left"></ItemsControl>
       </ScrollViewer>
       <!-- Bottom Controls -->
       <Grid VerticalAlignment="Bottom"
             ColumnDefinitions="*,Auto,Auto"
             Grid.Column="0"
             Grid.Row="2">
-        <TextBlock Text="{Binding ChestName}"
+        <Viewbox Stretch="Uniform" StretchDirection="Both" MaxHeight="18">
+          <TextBlock Text="{Binding ChestName}"
                   VerticalAlignment="Center"
                   HorizontalAlignment="Center"
-                  TextTrimming="CharacterEllipsis"
                   ToolTip.Tip="{Binding ChestPath}"
                   Margin="8,0,8,0"
                   Grid.Column="0" />
+        </Viewbox>
         <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Flyout="{StaticResource ControlFlyout}" Grid.Column="1">
-          <Image Source="{SvgImage avares://Tachylite/Assets/menu-icon.svg}" />
+          <Image Source="{SvgImage avares://Tachylite/Assets/menu-icon-dark.svg}" />
         </Button>
         <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Command="{Binding CloseChest}" Grid.Column="2">
-          <Image Source="{SvgImage avares://Tachylite/Assets/close-folder.svg}" />
+          <Image Source="{SvgImage avares://Tachylite/Assets/close-folder-dark.svg}" />
         </Button>
       </Grid>
       <GridSplitter ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" Background="DarkGray" Width="1" CornerRadius="12" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" />
@@ -83,7 +85,7 @@
                   SelectedItem="{Binding CurrentTab}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  Grid.Column="3"
+                  Grid.Column="2"
                   Grid.Row="0"
                   Grid.RowSpan="3" />
     </Grid>

@@ -1,7 +1,61 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" data-darkreader-inline-stroke="" style="--darkreader-inline-stroke: var(--darkreader-text-ffffff, #e8e6e3);">
-<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-<g id="SVGRepo_iconCarrier"> <path d="M4 5V19.5858C4 20.4767 5.07714 20.9229 5.7071 20.2929L12 14L18.2929 20.2929C18.9229 20.9229 20 20.4767 20 19.5858V5C20 3.89543 19.1046 3 18 3H6C4.89543 3 4 3.89543 4 5Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-darkreader-inline-stroke="" style="--darkreader-inline-stroke: var(--darkreader-text-ffffff, #e8e6e3);"/> </g>
-</svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#ffffff"
+   data-darkreader-inline-stroke=""
+   style="--darkreader-inline-stroke: var(--darkreader-text-ffffff, #e8e6e3);"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="bookmark-icon-dark.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="1.00875"
+     inkscape:cx="400"
+     inkscape:cy="479.30607"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     style="display:inline" />
+  <g
+     id="SVGRepo_iconCarrier"
+     style="fill:none;stroke:#d9d9d9;stroke-opacity:1">
+    <path
+       d="M4 5V19.5858C4 20.4767 5.07714 20.9229 5.7071 20.2929L12 14L18.2929 20.2929C18.9229 20.9229 20 20.4767 20 19.5858V5C20 3.89543 19.1046 3 18 3H6C4.89543 3 4 3.89543 4 5Z"
+       stroke="#ffffff"
+       stroke-width="2"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       data-darkreader-inline-stroke=""
+       style="--darkreader-inline-stroke:var(--darkreader-text-ffffff, #e8e6e3);fill:none;stroke:#d9d9d9;stroke-opacity:1"
+       id="path1" />
+  </g>
+</svg>
