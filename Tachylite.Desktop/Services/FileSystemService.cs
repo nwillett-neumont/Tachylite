@@ -185,7 +185,7 @@ public class FileSystemService : IFileSystemService
 
         if (Path.Exists(Path.Combine(createPath, name))) return;
 
-        File.Create(Path.Combine(createPath, name));
+        File.WriteAllText(Path.Combine(createPath, name), "");
     }
 
     public void ImportPdfFile(string chestPath, string? subfolder, string existingPdfPath)
@@ -319,7 +319,7 @@ public class FileSystemService : IFileSystemService
     {
         if (!File.Exists(filePath)) throw new IOException("filePath must point to an existing file");
 
-        byte maxAttempts = 10;
+        int maxAttempts = 10;
 
         for (; maxAttempts >= 0; maxAttempts--)
         {
@@ -383,7 +383,15 @@ public class FileSystemService : IFileSystemService
         if (!File.Exists(filePath)) throw new IOException($"File does not exist.");
         else if (GetFileType(filePath) != FileType.MD) throw new IOException($"File given is not a markdown file.");
 
-        File.WriteAllTextAsync(filePath, content);
+        File.WriteAllText(filePath, content);
+    }
+
+    public async Task SaveMarkdownFileAsync(string filePath, string content)
+    {
+        if (!File.Exists(filePath)) throw new IOException($"File does not exist.");
+        else if (GetFileType(filePath) != FileType.MD) throw new IOException($"File given is not a markdown file.");
+
+        await File.WriteAllTextAsync(filePath, content);
     }
 
     public void RenameFile(string filePath, string newName)
