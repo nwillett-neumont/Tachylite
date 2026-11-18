@@ -5,6 +5,7 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:vm="using:Tachylite.ViewModels"
             xmlns:views="using:Tachylite.Views"
+            xmlns:models="using:Tachylite.Models"
             xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Svg.Controls.Skia.Avalonia"
             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
             x:Class="Tachylite.Views.EditorView"
@@ -20,13 +21,12 @@
   <!-- Flyout menu for extra controls, I don't technically need this, but I think it makes my stuff more readable -->
   <UserControl.Resources>
     <Flyout x:Key="ControlFlyout" Placement="Top">
-      <Button Height="40" Width="40" Command="{Binding ToggleTemplateDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/template-icon.svg}" /></Button>
+      <Button Height="40" Width="40" Command="{Binding ToggleTemplateDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/template-icon-dark.svg}" /></Button>
     </Flyout>
   </UserControl.Resources>
 
-  <!-- StackPanel that holds everything -->
+  <!-- Outermost grid that holds all of the stuff on the page -->
   <Grid>
-    <!-- Outermost grid that holds all of the stuff on the page -->
     <Grid HorizontalAlignment="Stretch" RowDefinitions="Auto, *, Auto" >
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="15*" MinWidth="190" />
@@ -42,8 +42,14 @@
         <Button MaxHeight="40" MaxWidth="40" Command="{Binding ShowDiceRoller}"><Image Source="{SvgImage avares://Tachylite/Assets/die-icon-dark.svg}" /></Button>
       </StackPanel>
       <!-- FileTree -->
-      <ScrollViewer VerticalAlignment="Stretch" Background="Transparent" Grid.Column="0" Grid.Row="1">
-        <ScrollViewer.ContextMenu>
+      <TreeView ItemsSource="{Binding FileTree}" Background="Transparent" Grid.Column="0" Grid.Row="1">
+        <TreeView.Styles>
+          <Style Selector="TreeViewItem">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+          </Style>
+        </TreeView.Styles>
+        <TreeView.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Create New Markdown File"
                       Command="{Binding ToggleContextMenuCreateMarkdownDialogCommand}"
@@ -55,9 +61,43 @@
                       Command="{Binding ToggleContextMenuNewFolderDialogCommand}"
                       CommandParameter="{Binding ChestPath}"  />
           </ContextMenu>
-        </ScrollViewer.ContextMenu>
-        <ItemsControl ItemsSource="{Binding FileTree}" VerticalAlignment="Stretch" HorizontalAlignment="Left"></ItemsControl>
-      </ScrollViewer>
+        </TreeView.ContextMenu>
+        <TreeView.DataTemplates>
+          <TreeDataTemplate DataType="models:FolderTreeNode" ItemsSource="{Binding Children}">
+            <Border ToolTip.Tip="{Binding Path}" ToolTip.ShowDelay="1800" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="Transparent">
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+              <Border.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Rename Folder" 
+                              Command="{Binding RenameCommand}"
+                              CommandParameter="{Binding Path}" />
+                    <MenuItem Header="Create New Markdown File" 
+                              Command="{Binding CreateMarkdownFileCommand}"
+                              CommandParameter="{Binding Path}" />
+                    <MenuItem Header="Import PDF File" 
+                              Command="{Binding ImportPdfFileCommand}"
+                              CommandParameter="{Binding Path}" />
+                    <MenuItem Header="Create New Folder" 
+                              Command="{Binding CreateFolderCommand}"
+                              CommandParameter="{Binding Path}" />
+                  </ContextMenu>
+                </Border.ContextMenu>
+            </Border>
+          </TreeDataTemplate>
+          <TreeDataTemplate DataType="models:FileTreeNode">
+            <Border ToolTip.Tip="{Binding Path}" ToolTip.ShowDelay="1800" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="Transparent" PointerPressed="Click_FileButton">
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+              <Border.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Rename File" 
+                              Command="{Binding RenameCommand}"
+                              CommandParameter="{Binding Path}" />
+                  </ContextMenu>
+                </Border.ContextMenu>
+            </Border>
+          </TreeDataTemplate>
+        </TreeView.DataTemplates>
+      </TreeView>
       <!-- Bottom Controls -->
       <Grid VerticalAlignment="Bottom"
             ColumnDefinitions="*,Auto,Auto"

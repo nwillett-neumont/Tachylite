@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
+using Tachylite.Models;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
@@ -77,7 +78,7 @@ public partial class EditorViewModel : ViewModelBase
     [ObservableProperty]
     public partial TabItem? CurrentTab { get; set; }
 
-    public ObservableCollection<Button> FileTree { get; set; } = [];
+    public ObservableCollection<TreeNode> FileTree { get; set; } = [];
     public ObservableCollection<TabItem> Tabs { get; set; } = [];
 
     public EditorViewModel(IFileSystemService fileSystemService, IValidationService validationService, Func<string, MarkdownEditorViewModel> markdownEditorViewModelFactory, Func<string, PdfEditorViewModel> pdfEditorViewModelFactory, Func<HomeWindowViewModel> homeWindowViewModelFactory, DiceRollerViewModel diceRollerViewModel, string chestPath)
@@ -171,109 +172,71 @@ public partial class EditorViewModel : ViewModelBase
     public void PopulateFileTree()
     {
         FileTree = [];
-        (string[] Shown, string[] Hidden) = _fileSystemService.GetChestContents(ChestPath);
-        
-        AddContentToFileTree(Shown);
+        FolderModel rootModel = _fileSystemService.CreateFolderModel(ChestPath, ".");
+        (FolderModel[] folders, FileModel[] files) = (rootModel.SubFolders, rootModel.Files);
+    
+        BuildFileTree(ChestPath, folders, files);
 
-        if (ShowHidden) AddContentToFileTree(Hidden);
-        
         OnPropertyChanged(nameof(FileTree));
     }
 
-    private void AddContentToFileTree(string[] contents)
+    private void BuildFileTree(string path, FolderModel[] folders, FileModel[] files)
     {
-        foreach (string item in contents)
+        foreach (FolderModel folder in folders)
         {
-            int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 12;
-
-            Button fileTreeButton = new()
-            {
-                Content = Path.GetFileName(Path.GetFullPath(item)).Replace("_", "__"),
-                CommandParameter = Path.GetFullPath(item),
-                Margin = Avalonia.Thickness.Parse($"{depth},0,0,0")
-            };
-
-            fileTreeButton.SetValue(ToolTip.TipProperty, new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                Spacing = 8,
-                Children =
-                {
-                    new TextBlock()
-                    {
-                        Text = Path.GetFileName(item),
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        TextAlignment = Avalonia.Media.TextAlignment.Left,
-                    },
-                    new TextBlock()
-                    {
-                        Text = Path.GetFullPath(item),
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        TextAlignment = Avalonia.Media.TextAlignment.Left,
-                    }
-                }
-            });
-            fileTreeButton.SetValue(ToolTip.ShowDelayProperty, 1800);
-
-            if (Directory.Exists(item))
-            {
-                fileTreeButton.Command = ButtonDirectoryCommand;
-                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
-                {
-                    Items =
-                    {
-                        new MenuItem()
-                        {
-                            Header = "Rename Folder",
-                            Command = ToggleContextMenuRenameDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Create New Markdown File",
-                            Command = ToggleContextMenuCreateMarkdownDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Import PDF File",
-                            Command = ToggleContextMenuImportPdfDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Create New Folder",
-                            Command = ToggleContextMenuNewFolderDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Collapse Folder",
-                            Command = ButtonDirectoryCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        }
-                    }
-                });
-            }
-            else
-            {
-                fileTreeButton.Command = ButtonFileCommand;
-                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
-                {
-                    Items =
-                    {
-                        new MenuItem()
-                        {
-                            Header = "Rename File",
-                            Command = ToggleContextMenuRenameDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                    }
-                });
-            }
-
-            FileTree.Add(fileTreeButton);
+            if (folder.Name.StartsWith('.') && !ShowHidden) continue;
+            string folderPath = Path.Combine(path, folder.Name);
+            FolderTreeNode folderNode = new(folder.Name, 
+                                            folderPath, 
+                                            ToggleContextMenuRenameDialogCommand,
+                                            ToggleContextMenuCreateMarkdownDialogCommand,
+                                            ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuNewFolderDialogCommand);
+            FileTree.Add(BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files));
         }
+
+        foreach (FileModel file in files)
+        {
+            if (file.Name.StartsWith('.') && !ShowHidden) continue;
+            string filePath = Path.Combine(path, file.Name);
+            FileTreeNode fileNode = new(file.Name,
+                                        filePath,
+                                        OpenFileCommand,
+                                        filePath,
+                                        ToggleContextMenuRenameDialogCommand);
+            FileTree.Add(fileNode);
+        }
+    }
+
+    private FolderTreeNode BuildFolderTreeNode(string path, FolderTreeNode node, FolderModel[] folders, FileModel[] files)
+    {
+        foreach (FolderModel folder in folders)
+        {
+            if (folder.Name.StartsWith('.') && !ShowHidden) continue;
+            string folderPath = Path.Combine(path, folder.Name);
+            FolderTreeNode folderNode = new(folder.Name, 
+                                            folderPath, 
+                                            ToggleContextMenuRenameDialogCommand,
+                                            ToggleContextMenuCreateMarkdownDialogCommand,
+                                            ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuNewFolderDialogCommand);
+            folderNode.Children = BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files).Children;
+            node.Children.Add(folderNode);
+        }
+
+        foreach (FileModel file in files)
+        {
+            if (file.Name.StartsWith('.') && !ShowHidden) continue;
+            string filePath = Path.Combine(path, file.Name);
+            FileTreeNode fileNode = new(file.Name,
+                                        filePath,
+                                        OpenFileCommand,
+                                        filePath,
+                                        ToggleContextMenuRenameDialogCommand);
+            node.Children.Add(fileNode);
+        }
+
+        return node;
     }
 
     public void ShowDiceRoller()
@@ -445,6 +408,7 @@ public partial class EditorViewModel : ViewModelBase
             _fileSystemService.RenameFile(RenamePath, RenameNewName);
         }
 
+        // TODO: Fix crash caused by this line.
         var existingTab = Tabs.FirstOrDefault(tab => ((tab.Header as StackPanel)!.Children[0] as TextBlock)!.Text!.Equals(Path.GetFileName(RenamePath)));
 
         FileType fileType = _fileSystemService.GetFileType(RenameNewName);
@@ -506,28 +470,7 @@ public partial class EditorViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void ButtonDirectory(string directoryPath)
-    {
-        foreach (var button in FileTree)
-        {
-            Button? parent = FileTree.FirstOrDefault(parentButton => parentButton.CommandParameter != null && parentButton.CommandParameter is string && parentButton.CommandParameter.Equals(Directory.GetParent((button.CommandParameter as string)!)!.FullName));
-            bool buttonFileIsValid = button.CommandParameter is string && !string.IsNullOrWhiteSpace(button.CommandParameter as string) && Path.Exists(button.CommandParameter as string) && !Path.GetRelativePath(directoryPath, (button.CommandParameter as string)!).Contains("..");
-            if (button.CommandParameter!.Equals(directoryPath)) continue;
-            else if (buttonFileIsValid && parent != null && parent.IsVisible == true && Directory.GetParent((button.CommandParameter as string)!)!.FullName.Equals(directoryPath)) 
-            {
-                FileTree[FileTree.IndexOf(button)].IsVisible = !FileTree[FileTree.IndexOf(button)].IsVisible;
-            }
-            else if (buttonFileIsValid && parent != null && parent.CommandParameter != null && !parent.CommandParameter.Equals(ChestPath))
-            {
-                FileTree[FileTree.IndexOf(button)].IsVisible = false;
-            }
-        }
-
-        OnPropertyChanged(nameof(FileTree));
-    }
-
-    [RelayCommand]
-    public void ButtonFile(string filePath)
+    public void OpenFile(string filePath)
     {
         
         FileType fileType = _fileSystemService.GetFileType(filePath);

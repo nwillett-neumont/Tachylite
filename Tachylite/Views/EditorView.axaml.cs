@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Tachylite.Models;
 using Tachylite.ViewModels;
 
 namespace Tachylite.Views;
@@ -89,10 +90,18 @@ public partial class EditorView : UserControl
     private void ButtonNewFolder_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         _ = OpenFolderPicker("new_folder");
-    }    
+    }
 
     private void ButtonRename_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         _ = OpenFolderPicker("rename");
     }
-}   
+
+    private void Click_FileButton(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (sender != null && (sender is Border) && (sender as Border)!.DataContext is FileTreeNode)
+        {
+            ((sender as Border)?.DataContext as FileTreeNode)?.Command?.Execute(((sender as Border)?.DataContext as FileTreeNode)?.CommandParameter);
+        }
+    }
+}
