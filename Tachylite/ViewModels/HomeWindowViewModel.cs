@@ -2,6 +2,7 @@ using System;
 using Aspose.Pdf.Operators;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Tachylite.Core.Services;
+using Tachylite.Factories;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
@@ -14,21 +15,12 @@ public partial class HomeWindowViewModel : ViewModelBase
     public HomeViewModel Home { get; set; }
     public NewChestViewModel NewChest { get; set; }
 
-    private readonly IFileSystemService _fileSystemService;
-
-    private readonly IValidationService _validationService;
-
-    public string[] Recents;
-
-    public HomeWindowViewModel(string[] recents, IFileSystemService fileSystemService, IValidationService validationService)
+    public HomeWindowViewModel(HomeViewModel homeViewModel, NewChestViewModel newChestViewModel)
     {
-        Recents = recents;
-        _fileSystemService = fileSystemService;
-        _validationService = validationService;
-
-        Home = new(Recents, _fileSystemService, _validationService ) { ToNewChestView = ToNewChestView };
-        NewChest = new(Recents, _fileSystemService, _validationService) { ToHomeView = ToHomeView };
-
+        Home = homeViewModel;
+        Home.ToNewChestView = ToNewChestView;
+        NewChest =  newChestViewModel;
+        NewChest.ToHomeView = ToHomeView;
         CurrentView = Home;
     }
 

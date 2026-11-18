@@ -25,6 +25,7 @@ public interface IFileSystemService
     public void CreateUserFileBackup(string filePath);
     public void CreatePerChestFileBackup(string chestPath, string filePath);
     public void SaveMarkdownFile(string filePath, string content);
+    public Task SaveMarkdownFileAsync(string filePath, string content);
     public void RenameFile(string filePath, string newName);
     public void RenameFolder(string folderPath, string newName);
     public Dictionary<string, TemplateModel> GetTemplates();

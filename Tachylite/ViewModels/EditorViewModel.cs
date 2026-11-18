@@ -1,13 +1,14 @@
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Models;
 using Tachylite.Core.Services;
-using Tachylite.Tests.Core.Services;
+using Tachylite.Models;
 using Tachylite.Views;
 
 namespace Tachylite.ViewModels;
@@ -17,8 +18,13 @@ public partial class EditorViewModel : ViewModelBase
     private readonly IFileSystemService _fileSystemService;
 
     private readonly IValidationService _validationService;
+    private readonly Func<string, MarkdownEditorViewModel> _markdownEditorViewModelFactory;
+    private readonly Func<string, PdfEditorViewModel> _pdfEditorViewModelFactory;
+    private readonly Func<HomeWindowViewModel> _homeWindowViewModelFactory;
+    public DiceRollerViewModel DiceRoller { get; }
 
     public string ChestPath { get; set; }
+    public string ChestName{ get; set; }
 
     public Window? CurrentWindow { get; set; }
 
@@ -72,14 +78,19 @@ public partial class EditorViewModel : ViewModelBase
     [ObservableProperty]
     public partial TabItem? CurrentTab { get; set; }
 
-    public ObservableCollection<Button> FileTree { get; set; } = [];
+    public ObservableCollection<TreeNode> FileTree { get; set; } = [];
     public ObservableCollection<TabItem> Tabs { get; set; } = [];
 
-    public EditorViewModel(string chestPath, IFileSystemService fileSystemService, IValidationService validationService)
+    public EditorViewModel(IFileSystemService fileSystemService, IValidationService validationService, Func<string, MarkdownEditorViewModel> markdownEditorViewModelFactory, Func<string, PdfEditorViewModel> pdfEditorViewModelFactory, Func<HomeWindowViewModel> homeWindowViewModelFactory, DiceRollerViewModel diceRollerViewModel, string chestPath)
     {
-        ChestPath = chestPath;
         _fileSystemService = fileSystemService;
         _validationService = validationService;
+        _markdownEditorViewModelFactory = markdownEditorViewModelFactory;
+        _pdfEditorViewModelFactory = pdfEditorViewModelFactory;
+        DiceRoller = diceRollerViewModel;
+        _homeWindowViewModelFactory = homeWindowViewModelFactory;
+        ChestPath = chestPath;
+        ChestName = Path.GetFileName(ChestPath);
         PopulateFileTree();
     }
 
@@ -161,109 +172,71 @@ public partial class EditorViewModel : ViewModelBase
     public void PopulateFileTree()
     {
         FileTree = [];
-        (string[] Shown, string[] Hidden) = _fileSystemService.GetChestContents(ChestPath);
-        
-        AddContentToFileTree(Shown);
+        FolderModel rootModel = _fileSystemService.CreateFolderModel(ChestPath, ".");
+        (FolderModel[] folders, FileModel[] files) = (rootModel.SubFolders, rootModel.Files);
+    
+        BuildFileTree(ChestPath, folders, files);
 
-        if (ShowHidden) AddContentToFileTree(Hidden);
-        
         OnPropertyChanged(nameof(FileTree));
     }
 
-    private void AddContentToFileTree(string[] contents)
+    private void BuildFileTree(string path, FolderModel[] folders, FileModel[] files)
     {
-        foreach (string item in contents)
+        foreach (FolderModel folder in folders)
         {
-            int depth = (Path.GetFullPath(item).Replace(Path.GetFullPath(ChestPath) + Path.DirectorySeparatorChar, "").Split(Path.DirectorySeparatorChar).Length - 1) * 12;
-
-            Button fileTreeButton = new()
-            {
-                Content = Path.GetFileName(Path.GetFullPath(item)).Replace("_", "__"),
-                CommandParameter = Path.GetFullPath(item),
-                Margin = Avalonia.Thickness.Parse($"{depth},0,0,0")
-            };
-
-            fileTreeButton.SetValue(ToolTip.TipProperty, new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                Spacing = 8,
-                Children =
-                {
-                    new TextBlock()
-                    {
-                        Text = Path.GetFileName(item),
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        TextAlignment = Avalonia.Media.TextAlignment.Left,
-                    },
-                    new TextBlock()
-                    {
-                        Text = Path.GetFullPath(item),
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        TextAlignment = Avalonia.Media.TextAlignment.Left,
-                    }
-                }
-            });
-            fileTreeButton.SetValue(ToolTip.ShowDelayProperty, 1800);
-
-            if (Directory.Exists(item))
-            {
-                fileTreeButton.Command = ButtonDirectoryCommand;
-                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
-                {
-                    Items =
-                    {
-                        new MenuItem()
-                        {
-                            Header = "Rename Folder",
-                            Command = ToggleContextMenuRenameDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Create New Markdown File",
-                            Command = ToggleContextMenuCreateMarkdownDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Import PDF File",
-                            Command = ToggleContextMenuImportPdfDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Create New Folder",
-                            Command = ToggleContextMenuNewFolderDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                        new MenuItem()
-                        {
-                            Header = "Collapse Folder",
-                            Command = ButtonDirectoryCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        }
-                    }
-                });
-            }
-            else
-            {
-                fileTreeButton.Command = ButtonFileCommand;
-                fileTreeButton.SetValue(Control.ContextMenuProperty, new ContextMenu()
-                {
-                    Items =
-                    {
-                        new MenuItem()
-                        {
-                            Header = "Rename File",
-                            Command = ToggleContextMenuRenameDialogCommand,
-                            CommandParameter = Path.GetFullPath(item)
-                        },
-                    }
-                });
-            }
-
-            FileTree.Add(fileTreeButton);
+            if (folder.Name.StartsWith('.') && !ShowHidden) continue;
+            string folderPath = Path.Combine(path, folder.Name);
+            FolderTreeNode folderNode = new(folder.Name, 
+                                            folderPath, 
+                                            ToggleContextMenuRenameDialogCommand,
+                                            ToggleContextMenuCreateMarkdownDialogCommand,
+                                            ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuNewFolderDialogCommand);
+            FileTree.Add(BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files));
         }
+
+        foreach (FileModel file in files)
+        {
+            if (file.Name.StartsWith('.') && !ShowHidden) continue;
+            string filePath = Path.Combine(path, file.Name);
+            FileTreeNode fileNode = new(file.Name,
+                                        filePath,
+                                        OpenFileCommand,
+                                        filePath,
+                                        ToggleContextMenuRenameDialogCommand);
+            FileTree.Add(fileNode);
+        }
+    }
+
+    private FolderTreeNode BuildFolderTreeNode(string path, FolderTreeNode node, FolderModel[] folders, FileModel[] files)
+    {
+        foreach (FolderModel folder in folders)
+        {
+            if (folder.Name.StartsWith('.') && !ShowHidden) continue;
+            string folderPath = Path.Combine(path, folder.Name);
+            FolderTreeNode folderNode = new(folder.Name, 
+                                            folderPath, 
+                                            ToggleContextMenuRenameDialogCommand,
+                                            ToggleContextMenuCreateMarkdownDialogCommand,
+                                            ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuNewFolderDialogCommand);
+            folderNode.Children = BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files).Children;
+            node.Children.Add(folderNode);
+        }
+
+        foreach (FileModel file in files)
+        {
+            if (file.Name.StartsWith('.') && !ShowHidden) continue;
+            string filePath = Path.Combine(path, file.Name);
+            FileTreeNode fileNode = new(file.Name,
+                                        filePath,
+                                        OpenFileCommand,
+                                        filePath,
+                                        ToggleContextMenuRenameDialogCommand);
+            node.Children.Add(fileNode);
+        }
+
+        return node;
     }
 
     public void ShowDiceRoller()
@@ -435,6 +408,26 @@ public partial class EditorViewModel : ViewModelBase
             _fileSystemService.RenameFile(RenamePath, RenameNewName);
         }
 
+        // TODO: Fix crash caused by this line.
+        var existingTab = Tabs.FirstOrDefault(tab => ((tab.Header as StackPanel)!.Children[0] as TextBlock)!.Text!.Equals(Path.GetFileName(RenamePath)));
+
+        FileType fileType = _fileSystemService.GetFileType(RenameNewName);
+
+        var newTab = CreateTab(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName), fileType);
+
+        Tabs.Add(newTab);
+
+        if (CurrentTab?.Equals(existingTab) ?? false) CurrentTab = newTab;
+
+        if (existingTab != null)
+        {
+            ((existingTab.Content as MarkdownEditorView)?.DataContext as MarkdownEditorViewModel)?.Dispose();
+            Tabs.Remove(existingTab);
+        } 
+
+        OnPropertyChanged(nameof(CurrentTab));
+        OnPropertyChanged(nameof(Tabs));
+
         PopulateFileTree();
     }
 
@@ -466,36 +459,20 @@ public partial class EditorViewModel : ViewModelBase
 
     public void CloseChest()
     {
-        HomeWindow home = new() { DataContext = new HomeWindowViewModel(_fileSystemService.GetRecents(), _fileSystemService, _validationService) };
+        foreach (TabItem tab in Tabs)
+        {
+            if (tab.Content is MarkdownEditorView) ((tab.Content as MarkdownEditorView)?.DataContext as MarkdownEditorViewModel)?.Dispose();
+        }
+
+        HomeWindow home = new() { DataContext = _homeWindowViewModelFactory.Invoke() };
         home.Show();
         CurrentWindow?.Close();
     }
 
     [RelayCommand]
-    public void ButtonDirectory(string directoryPath)
+    public void OpenFile(string filePath)
     {
-        foreach (var button in FileTree)
-        {
-            Button? parent = FileTree.FirstOrDefault(parentButton => parentButton.CommandParameter != null && parentButton.CommandParameter is string && parentButton.CommandParameter.Equals(Directory.GetParent((button.CommandParameter as string)!)!.FullName));
-            bool buttonFileIsValid = button.CommandParameter is string && !string.IsNullOrWhiteSpace(button.CommandParameter as string) && Path.Exists(button.CommandParameter as string) && !Path.GetRelativePath(directoryPath, (button.CommandParameter as string)!).Contains("..");
-            if (button.CommandParameter!.Equals(directoryPath)) continue;
-            else if (buttonFileIsValid && parent != null && parent.IsVisible == true && Directory.GetParent((button.CommandParameter as string)!)!.FullName.Equals(directoryPath)) 
-            {
-                FileTree[FileTree.IndexOf(button)].IsVisible = !FileTree[FileTree.IndexOf(button)].IsVisible;
-            }
-            else if (buttonFileIsValid && parent != null && parent.CommandParameter != null && !parent.CommandParameter.Equals(ChestPath))
-            {
-                FileTree[FileTree.IndexOf(button)].IsVisible = false;
-            }
-        }
-
-        OnPropertyChanged(nameof(FileTree));
-    }
-
-    [RelayCommand]
-    public void ButtonFile(string filePath)
-    {
-        TabItem tab = new();
+        
         FileType fileType = _fileSystemService.GetFileType(filePath);
 
         TabItem? existingTab = null;
@@ -520,6 +497,19 @@ public partial class EditorViewModel : ViewModelBase
             return;
         }
         
+        TabItem tab = CreateTab(filePath, fileType);
+
+        Tabs.Add(tab);
+        CurrentTab = tab;
+
+        OnPropertyChanged(nameof(CurrentTab));
+        OnPropertyChanged(nameof(Tabs));
+    }
+
+    private TabItem CreateTab(string filePath, FileType fileType)
+    {
+        TabItem tab = new();
+
         switch(fileType)
         {
             case FileType.MD:
@@ -540,17 +530,23 @@ public partial class EditorViewModel : ViewModelBase
                                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
                                 },
-                                Command = new RelayCommand(() => Tabs.Remove(tab)),
+                                Command = new RelayCommand(() =>
+                                {
+                                    ((tab.Content as MarkdownEditorView)!.DataContext as MarkdownEditorViewModel)!.Dispose();
+                                    Tabs.Remove(tab);
+                                }),
                                 Width = 40,
                                 Height = 40,
+                                Background = Brushes.Transparent,
                                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right
                             }
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        Spacing = 8
+                        Spacing = 8,
+                        MaxWidth = 300
                     };
-                tab.Content = new MarkdownEditorView() { DataContext = new MarkdownEditorViewModel(filePath, _fileSystemService, _validationService, App.Services!.GetRequiredService<IMarkdownService>(), App.Services!.GetRequiredService<IUndoService>()) };
+                tab.Content = new MarkdownEditorView() { DataContext = _markdownEditorViewModelFactory.Invoke(filePath) };
                 
                 break;
             case FileType.PDF:
@@ -574,14 +570,16 @@ public partial class EditorViewModel : ViewModelBase
                                 Command = new RelayCommand(() => Tabs.Remove(tab)),
                                 Width = 40,
                                 Height = 40,
+                                Background = Brushes.Transparent,
                                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right
                             }
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        Spacing = 8
+                        Spacing = 8,
+                        MaxWidth = 300
                     };
-                tab.Content = new PdfEditorView() { DataContext = new PdfEditorViewModel(_fileSystemService, App.Services.GetService<IPdfService>(), filePath, PdfPageBackgroundImageType.Vector) };
+                tab.Content = new PdfEditorView() { DataContext = _pdfEditorViewModelFactory.Invoke(filePath) };
                 break;
             default:
                 tab = new()
@@ -591,12 +589,6 @@ public partial class EditorViewModel : ViewModelBase
                 };
                 break;
         }
-
-        Tabs.Add(tab);
-        CurrentTab = tab;
-
-        OnPropertyChanged(nameof(CurrentTab));
-        OnPropertyChanged(nameof(Tabs));
+        return tab;
     }
-
 }

@@ -4,6 +4,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
+using Tachylite.Core.Services;
 using Tachylite.ViewModels;
 
 namespace Tachylite.Views;
@@ -13,8 +14,6 @@ public partial class DiceRollerView : UserControl
     public DiceRollerView()
     {
         InitializeComponent();
-
-        DataContext = App.Services?.GetRequiredService<DiceRollerViewModel>();
     }
 
     private void ButtonClose_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

@@ -11,8 +11,8 @@ namespace Tachylite.ViewModels;
 
 public partial class DiceRollerViewModel : ViewModelBase
 {
-    private readonly IValidationService _validationService = App.Services?.GetRequiredService<IValidationService>();
-    private readonly IDiceRollerService _diceRollerService = App.Services?.GetRequiredService<IDiceRollerService>();
+    private readonly IValidationService _validationService;
+    private readonly IDiceRollerService _diceRollerService;
 
     public int[] RollOptions { get; } = [.. Enumerable.Range(1, 100)];
     public int[] FaceOptions { get; } = [2, 4, 6, 8, 10, 12, 20, 100];

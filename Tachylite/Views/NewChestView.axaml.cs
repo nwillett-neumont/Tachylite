@@ -13,14 +13,11 @@ namespace Tachylite.Views;
 
 public partial class NewChestView : UserControl
 {
-    private readonly IFileSystemService? _fileSystemService;
-
     public NewChestView()
     {
         InitializeComponent();
         DataContextChanged += SetCurrentWindow;
         AttachedToVisualTree += SetCurrentWindow;
-        _fileSystemService = App.Services?.GetRequiredService<IFileSystemService>();
     }
 
     private void SetCurrentWindow(object? sender,
@@ -47,7 +44,7 @@ public partial class NewChestView : UserControl
         {
             Title = "Open Chest Folder",
             AllowMultiple = false,
-            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync(_fileSystemService?.GetUserDocumentsDirectory() ?? "")
+            SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync((DataContext as NewChestViewModel)?.GetUserDocumentsDirectory() ?? "")
         });
 
         if (chestFolder.Count > 0)

@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Services;
+using Tachylite.Factories;
 using Tachylite.Tests.Core.Services;
 using Tachylite.ViewModels;
 using Tachylite.Views;
@@ -13,8 +14,6 @@ namespace Tachylite;
 public partial class App : Application
 {
     public static Action<IServiceCollection>? ConfigurePlatformSpecificServices { get; set; }
-
-    public static IServiceProvider? Services { get; private set;}
 
     public override void Initialize()
     {
@@ -30,12 +29,11 @@ public partial class App : Application
         collection.AddCommonServices();
         ConfigurePlatformSpecificServices!.Invoke(collection);
 
-        Services = collection.BuildServiceProvider();
+        var services = collection.BuildServiceProvider();
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            IFileSystemService fileSystemService = Services.GetRequiredService<IFileSystemService>();
-            IMarkdownService markdownService = Services.GetRequiredService<IMarkdownService>();
+            IFileSystemService fileSystemService = services.GetRequiredService<IFileSystemService>();
 
             if (!fileSystemService.UserConfigurationDirectoryExists()) fileSystemService.InitializeUserConfigurationDirectory();
 
@@ -47,7 +45,7 @@ public partial class App : Application
                 {
                     desktop.MainWindow = new EditorWindow
                     {
-                        DataContext = new EditorViewModel(path, fileSystemService, Services.GetRequiredService<IValidationService>())
+                        DataContext = services.GetRequiredService<EditorViewModelFactory>().CreateEditorViewModel(path)
                     };
                     break;
                 }
@@ -63,22 +61,22 @@ public partial class App : Application
             {
                 desktop.MainWindow = new HomeWindow
                 {
-                    DataContext = new HomeWindowViewModel(recents, fileSystemService, Services.GetRequiredService<IValidationService>())
+                    DataContext = services.GetRequiredService<HomeWindowViewModel>()
                 };
             }
 
         }
-        else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
-        {
-            singleViewFactoryApplicationLifetime.MainViewFactory = () => new MainView { DataContext = new MainViewModel() };
-        }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = new MainViewModel()
-            };
-        }
+        // else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
+        // {
+        //     singleViewFactoryApplicationLifetime.MainViewFactory = () => new MainView { DataContext = new MainViewModel() };
+        // }
+        // else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
+        // {
+        //     singleViewPlatform.MainView = new MainView
+        //     {
+        //         DataContext = new MainViewModel()
+        //     };
+        // }
 
         base.OnFrameworkInitializationCompleted();
     }
