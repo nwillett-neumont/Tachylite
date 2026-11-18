@@ -409,21 +409,21 @@ public partial class EditorViewModel : ViewModelBase
         }
 
         // TODO: Fix crash caused by this line.
-        var existingTab = Tabs.FirstOrDefault(tab => ((tab.Header as StackPanel)!.Children[0] as TextBlock)!.Text!.Equals(Path.GetFileName(RenamePath)));
+        var existingTab = Tabs.Where(tab => tab.Header is StackPanel).FirstOrDefault(tab => ((tab.Header as StackPanel)!.Children[0] as TextBlock)!.Text!.Equals(Path.GetFileName(RenamePath)));
 
         FileType fileType = _fileSystemService.GetFileType(RenameNewName);
 
-        var newTab = CreateTab(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName), fileType);
-
-        Tabs.Add(newTab);
-
-        if (CurrentTab?.Equals(existingTab) ?? false) CurrentTab = newTab;
-
         if (existingTab != null)
         {
+            var newTab = CreateTab(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName), fileType);
+
+            Tabs.Add(newTab);
+
+            if (CurrentTab?.Equals(existingTab) ?? false) CurrentTab = newTab;
+
             ((existingTab.Content as MarkdownEditorView)?.DataContext as MarkdownEditorViewModel)?.Dispose();
             Tabs.Remove(existingTab);
-        } 
+        }
 
         OnPropertyChanged(nameof(CurrentTab));
         OnPropertyChanged(nameof(Tabs));
