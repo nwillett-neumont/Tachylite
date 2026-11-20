@@ -5,7 +5,6 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Tachylite.Core.Services;
 using Tachylite.Factories;
-using Tachylite.Tests.Core.Services;
 using Tachylite.ViewModels;
 using Tachylite.Views;
 
