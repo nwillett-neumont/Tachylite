@@ -1,8 +1,4 @@
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using Aspose.Pdf;
-using Aspose.Pdf.Annotations;
 using Aspose.Pdf.Devices;
 using Aspose.Pdf.Text;
 using Tachylite.Core.Models;
@@ -101,7 +97,7 @@ public class PdfService : IPdfService
         return new PdfImageElementModel()
         {
             Bounds = imagePlacement.Rectangle.ToRect(),
-            ImageData = imagePlacement.Image?.GetDecodedData()
+            ImageData = imagePlacement.Image?.ToPng()
         };
     }
 }
