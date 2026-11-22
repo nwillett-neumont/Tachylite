@@ -523,7 +523,9 @@ public partial class EditorViewModel : ViewModelBase
                                 {
                                     Text = "x",
                                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                    TextTrimming = TextTrimming.CharacterEllipsis,
+                                    MaxWidth = 280
                                 },
                                 Command = new RelayCommand(() =>
                                 {
@@ -538,8 +540,7 @@ public partial class EditorViewModel : ViewModelBase
                             }
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        Spacing = 8,
-                        MaxWidth = 300
+                        Spacing = 8
                     };
                 tab.Content = new MarkdownEditorView() { DataContext = _markdownEditorViewModelFactory.Invoke(filePath) };
                 
@@ -552,7 +553,9 @@ public partial class EditorViewModel : ViewModelBase
                             new TextBlock() 
                             {
                                 Text = Path.GetFileName(Path.GetFullPath(filePath)), 
-                                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center 
+                                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                TextTrimming = TextTrimming.CharacterEllipsis,
+                                MaxWidth = 280
                             },
                             new Button ()
                             {
@@ -572,7 +575,6 @@ public partial class EditorViewModel : ViewModelBase
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8,
-                        MaxWidth = 300
                     };
                 tab.Content = new PdfEditorView() { DataContext = _pdfEditorViewModelFactory.Invoke(filePath) };
                 break;
