@@ -65,8 +65,6 @@ public partial class PdfEditorViewModel : ViewModelBase
             // Images first so text controls stay above them for selection/editing.
             foreach (var image in page.ImageElements)
             {
-                if (image.ImageData is not { Length: > 0 }) continue;
-
                 var bounds = GetDisplayBounds(page, image.Bounds, PointsToDips);
                 if (bounds.Width <= 0 || bounds.Height <= 0) continue;
 
@@ -149,24 +147,24 @@ public partial class PdfEditorViewModel : ViewModelBase
         return textBox;
     }
 
-    private static Image CreateImageElement(PdfImageElementModel image, Rect bounds)
+    private static Control CreateImageElement(PdfImageElementModel image, Rect bounds)
+{
+    // The image is already painted in the page background by Aspose's renderer.
+    // Drawing it again would duplicate it, cover other content, and lose
+    // clipping/alpha/CMYK handling. Use a transparent hit target instead.
+    var hitArea = new Border
     {
-        using var imageStream = new MemoryStream(image.ImageData!);
+        Background = Brushes.Transparent,
+        Width = Math.Max(bounds.Width, 1.0),
+        Height = Math.Max(bounds.Height, 1.0),
+        Cursor = new Cursor(StandardCursorType.Hand)
+    };
 
-        var imageControl = new Image
-        {
-            Source = new Bitmap(imageStream),
-            Stretch = Stretch.Fill,
-            Width = Math.Max(bounds.Width, 1.0),
-            Height = Math.Max(bounds.Height, 1.0),
-            Cursor = new Cursor(StandardCursorType.Hand)
-        };
+    Canvas.SetLeft(hitArea, bounds.X);
+    Canvas.SetTop(hitArea, bounds.Y);
 
-        Canvas.SetLeft(imageControl, bounds.X);
-        Canvas.SetTop(imageControl, bounds.Y);
-
-        return imageControl;
-    }
+    return hitArea;
+}
 
     private static Size GetDisplaySize(PdfPageModel page, double scale)
     {

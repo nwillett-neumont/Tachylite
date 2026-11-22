@@ -10,5 +10,4 @@ public interface IPdfService
     public PdfDocumentModel ConstructPdfDocumentModel(byte[] document, string documentName, PdfPageBackgroundImageType backgroundImageType);
     public PdfPageModel ConstructPdfPageModel(Page page, PdfPageBackgroundImageType backgroundImageType);
     public PdfTextElementModel ConstructPdfTextElementModel(TextFragment textFragment);
-    public PdfImageElementModel ConstructPdfImageElementModel(ImagePlacement imagePlacement);
 }

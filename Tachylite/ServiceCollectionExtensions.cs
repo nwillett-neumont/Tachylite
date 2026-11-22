@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
 
         collection.AddSingleton<Func<string, PdfEditorViewModel>>(serviceProvider =>
             path => ActivatorUtilities.CreateInstance<PdfEditorViewModel>(
-            serviceProvider, path, PdfPageBackgroundImageType.Vector));
+            serviceProvider, path, PdfPageBackgroundImageType.Bitmap));
 
         collection.AddSingleton<Func<HomeWindowViewModel>>(serviceProvider =>
             () => serviceProvider.GetRequiredService<HomeWindowViewModel>());

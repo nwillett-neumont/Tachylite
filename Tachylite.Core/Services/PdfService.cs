@@ -48,24 +48,24 @@ public class PdfService : IPdfService
 
         foreach(var imagePlacement in imagePlacementAbsorber.ImagePlacements)
         {
-            imageElements.Add(ConstructPdfImageElementModel(imagePlacement));
-            imagePlacement.Hide();
+            // Changed by OpenCode Big Pickle
+            var bounds = imagePlacement.Rectangle.ToRect();
+            if (bounds.Width <= 0 || bounds.Height <= 0) continue;
+
+            imageElements.Add(new PdfImageElementModel
+            {
+                Bounds = bounds,
+                ImageData = null // images live in the background; nothing to decode
+            });
         }
 
         byte[] backgroundImage;
-
-        if (backgroundImageType == PdfPageBackgroundImageType.Bitmap)
-        {
-            BmpDevice imageDevice = new();
-            backgroundImage = imageDevice.Process(page);
-        } else
-        {
-            MemoryStream stream = new();
-            SvgDevice imageDevice = new();
-            imageDevice.Process(page, stream);
-            backgroundImage = stream.ToArray();
-            stream.Dispose();
-        }
+        
+        // Redone by OpenCode Big Pickle.
+        // Use a raster device. SvgDevice does not faithfully render this PDF's
+        // CMYK images with soft masks, which leaves large blank areas.
+        PngDevice imageDevice = new(new Resolution(150));
+        backgroundImage = imageDevice.Process(page);
 
         return new PdfPageModel()
         {
@@ -89,15 +89,6 @@ public class PdfService : IPdfService
             FontSize = textFragment.TextState.FontSize,
             ForegroundColor = textFragment.TextState.ForegroundColor?.ToRgb(),
             BackgroundColor = textFragment.TextState.BackgroundColor?.ToRgb()
-        };
-    }
-
-    public PdfImageElementModel ConstructPdfImageElementModel(ImagePlacement imagePlacement)
-    {
-        return new PdfImageElementModel()
-        {
-            Bounds = imagePlacement.Rectangle.ToRect(),
-            ImageData = imagePlacement.Image?.ToPng()
         };
     }
 }
