@@ -43,28 +43,12 @@ public class PdfService : IPdfService
             textAbsorber.TextFragments.Remove(textAbsorber.TextFragments[i]);
         }
 
-        ImagePlacementAbsorber imagePlacementAbsorber = new();
-        page.Accept(imagePlacementAbsorber);
-
-        foreach(var imagePlacement in imagePlacementAbsorber.ImagePlacements)
-        {
-            // Changed by OpenCode Big Pickle
-            var bounds = imagePlacement.Rectangle.ToRect();
-            if (bounds.Width <= 0 || bounds.Height <= 0) continue;
-
-            imageElements.Add(new PdfImageElementModel
-            {
-                Bounds = bounds,
-                ImageData = null // images live in the background; nothing to decode
-            });
-        }
-
         byte[] backgroundImage;
         
         // Redone by OpenCode Big Pickle.
         // Use a raster device. SvgDevice does not faithfully render this PDF's
         // CMYK images with soft masks, which leaves large blank areas.
-        PngDevice imageDevice = new(new Resolution(150));
+        PngDevice imageDevice = new(new Resolution(110));
         backgroundImage = imageDevice.Process(page);
 
         return new PdfPageModel()
