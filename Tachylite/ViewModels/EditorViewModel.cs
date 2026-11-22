@@ -43,10 +43,10 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool IsRenameDialogVisible { get; set; } = false;
 
     [ObservableProperty]
-    public partial bool IsNewTemplateVisible { get; set; } = false;
+    public partial bool IsNewTemplateDialogVisible { get; set; } = false;
 
     [ObservableProperty]
-    public partial bool DisplayDiceRoller { get; set; } = false;
+    public partial bool IsDiceRollerVisible { get; set; } = false;
 
     [ObservableProperty]
     public partial string NewFileName { get; set; } = "";
@@ -239,19 +239,26 @@ public partial class EditorViewModel : ViewModelBase
         return node;
     }
 
-    public void ShowDiceRoller()
+    public void HideDialogs(Dialogs exclude)
     {
-        DisplayDiceRoller = true;
+        IsDiceRollerVisible = (exclude == Dialogs.DiceRollerDialog) && !IsDiceRollerVisible;
+        IsCreateMarkdownDialogVisible = (exclude == Dialogs.CreateMarkdownDialog) && !IsCreateMarkdownDialogVisible;
+        IsImportPdfDialogVisible = (exclude == Dialogs.ImportPdfDialog) && !IsImportPdfDialogVisible;
+        IsNewFolderDialogVisible = (exclude == Dialogs.NewFolderDialog) && !IsNewFolderDialogVisible;
+        IsRenameDialogVisible = (exclude == Dialogs.RenameDialog) && !IsRenameDialogVisible;
+        IsNewTemplateDialogVisible = (exclude == Dialogs.TemplateDialog) && !IsNewTemplateDialogVisible;
+    }
+
+    public void ToggleDiceRollerDialog()
+    {
+        HideDialogs(Dialogs.DiceRollerDialog);
     }
 
     [RelayCommand]
     public void ToggleCreateMarkdownDialog()
     {
         NewFilePathIsEnabled = true;
-        IsNewFolderDialogVisible = false;
-        IsImportPdfDialogVisible = false;
-        IsRenameDialogVisible = false;
-        IsCreateMarkdownDialogVisible = !IsCreateMarkdownDialogVisible;
+        HideDialogs(Dialogs.CreateMarkdownDialog);
 
         NewFileName = NewFilePath = "";
         NewFileNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
@@ -289,10 +296,7 @@ public partial class EditorViewModel : ViewModelBase
     public void ToggleImportPdfDialog()
     {
         NewPdfPathIsEnabled = true;
-        IsNewFolderDialogVisible = false;
-        IsCreateMarkdownDialogVisible = false;
-        IsRenameDialogVisible = false;
-        IsImportPdfDialogVisible = !IsImportPdfDialogVisible;
+        HideDialogs(Dialogs.ImportPdfDialog);
 
         ExistingPdfPath = NewPdfPath = "";
         PdfFileHasBeenAttempted = PdfPathHasBeenAttempted = false;
@@ -330,10 +334,7 @@ public partial class EditorViewModel : ViewModelBase
     public void ToggleNewFolderDialog()
     {
         NewFolderPathIsEnabled = true;
-        IsCreateMarkdownDialogVisible = false;
-        IsImportPdfDialogVisible = false;
-        IsRenameDialogVisible = false;
-        IsNewFolderDialogVisible = !IsNewFolderDialogVisible;
+        HideDialogs(Dialogs.NewFolderDialog);
 
         NewFolderName = NewFolderPath = "";
         NewFolderNameHasBeenAttempted = NewFolderPathHasBeenAttempted = false;
@@ -369,10 +370,7 @@ public partial class EditorViewModel : ViewModelBase
     public void ToggleRenameDialog()
     {
         RenameEntryIsEnabled = true;
-        IsCreateMarkdownDialogVisible =  false;
-        IsNewFolderDialogVisible = false;
-        IsImportPdfDialogVisible = false;
-        IsRenameDialogVisible = !IsRenameDialogVisible;
+        HideDialogs(Dialogs.RenameDialog);
 
         RenameNewName = RenamePath = "";
     }
@@ -436,10 +434,7 @@ public partial class EditorViewModel : ViewModelBase
     {
         
         RenameEntryIsEnabled = false;
-        IsCreateMarkdownDialogVisible =  false;
-        IsNewFolderDialogVisible = false;
-        IsImportPdfDialogVisible = false;
-        IsNewTemplateVisible = !IsNewTemplateVisible;
+        HideDialogs(Dialogs.TemplateDialog);
 
         NewTemplateName = Path.GetFileName(ChestPath);
         OnPropertyChanged(nameof(NewTemplateNameIsInvalid));
@@ -454,7 +449,7 @@ public partial class EditorViewModel : ViewModelBase
         _fileSystemService.CreateTemplate(ChestPath, NewTemplateName);
         OnPropertyChanged(nameof(NewTemplateNameIsInvalid));
 
-        IsNewTemplateVisible = false;
+        IsNewTemplateDialogVisible = false;
     }
 
     public void CloseChest()
@@ -528,7 +523,9 @@ public partial class EditorViewModel : ViewModelBase
                                 {
                                     Text = "x",
                                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                                    TextTrimming = TextTrimming.CharacterEllipsis,
+                                    MaxWidth = 280
                                 },
                                 Command = new RelayCommand(() =>
                                 {
@@ -543,8 +540,7 @@ public partial class EditorViewModel : ViewModelBase
                             }
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        Spacing = 8,
-                        MaxWidth = 300
+                        Spacing = 8
                     };
                 tab.Content = new MarkdownEditorView() { DataContext = _markdownEditorViewModelFactory.Invoke(filePath) };
                 
@@ -557,7 +553,9 @@ public partial class EditorViewModel : ViewModelBase
                             new TextBlock() 
                             {
                                 Text = Path.GetFileName(Path.GetFullPath(filePath)), 
-                                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center 
+                                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                                TextTrimming = TextTrimming.CharacterEllipsis,
+                                MaxWidth = 280
                             },
                             new Button ()
                             {
@@ -577,7 +575,6 @@ public partial class EditorViewModel : ViewModelBase
                         },
                         Orientation = Avalonia.Layout.Orientation.Horizontal,
                         Spacing = 8,
-                        MaxWidth = 300
                     };
                 tab.Content = new PdfEditorView() { DataContext = _pdfEditorViewModelFactory.Invoke(filePath) };
                 break;

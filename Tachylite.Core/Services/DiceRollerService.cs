@@ -16,9 +16,17 @@ public class DiceRollerService : IDiceRollerService
         return (firstValueExists ? numberOfRolls : 1, secondValueExists ? faceCount : throw new FormatException("Invalid format for dice roll"));
     }
 
+    public long SumOfRoll(long[] rollResults)
+    {
+        long sumOfRoll = 0;
+        foreach (var roll in rollResults) sumOfRoll += roll;
+        return sumOfRoll;
+    }
+
     public long[] CalculateDiceRoll(long numberOfRolls, long faceCount)
     {
         if (numberOfRolls < 1 || faceCount < 1) throw new ArgumentException("The number of rolls and the face count must not be zero or negative.");
+        if (numberOfRolls > 10000 || faceCount > 10000) throw new ArgumentException("The face count cannot be over 10,000.");
         
         long[] rolls = new long[numberOfRolls];
 
@@ -32,14 +40,7 @@ public class DiceRollerService : IDiceRollerService
 
     public long[] RollDice(string diceRoll)
     {
-        (long, long) result = ParseDiceInput(diceRoll);
-        return CalculateDiceRoll(result.Item1, result.Item2);
-    }
-
-    public long SumOfRoll(long[] rollResults)
-    {
-        long sumOfRoll = 0;
-        foreach (var roll in rollResults) sumOfRoll += roll;
-        return sumOfRoll;
+        (long numberOfRolls, long faceCount) = ParseDiceInput(diceRoll);
+        return CalculateDiceRoll(numberOfRolls, faceCount);
     }
 }

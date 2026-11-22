@@ -19,10 +19,33 @@
   </UserControl.Styles>
 
   <!-- Flyout menu for extra controls, I don't technically need this, but I think it makes my stuff more readable -->
-  <UserControl.Resources>
-    <Flyout x:Key="ControlFlyout" Placement="Top">
-      <Button Height="40" Width="40" Command="{Binding ToggleTemplateDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/template-icon-dark.svg}" /></Button>
-    </Flyout>
+  <UserControl.Resources>  
+    <ResourceDictionary>
+      <Flyout x:Key="ControlFlyout" Placement="Top">
+        <Button Height="40" Width="40" Command="{Binding ToggleTemplateDialog}" Content="{DynamicResource TemplateIcon}" />
+      </Flyout>
+      <!-- Theme-specific icons -->
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <Image x:Key="MarkdownIcon" Source="{ SvgImage avares://Tachylite/Assets/new-note.svg }" />
+          <Image x:Key="PdfIcon" Source="{SvgImage avares://Tachylite/Assets/import-pdf.svg}" />
+          <Image x:Key="NewFolderIcon" Source="{SvgImage avares://Tachylite/Assets/new-folder.svg}" />
+          <Image x:Key="DieIcon" Source="{SvgImage avares://Tachylite/Assets/die-icon.svg}" />
+          <Image x:Key="MenuIcon" Source="{SvgImage avares://Tachylite/Assets/menu-icon.svg}" />
+          <Image x:Key="CloseFolderIcon" Source="{SvgImage avares://Tachylite/Assets/close-folder.svg}" />
+          <Image x:Key="TemplateIcon" Source="{SvgImage avares://Tachylite/Assets/template-icon.svg}" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <Image x:Key="MarkdownIcon" Source="{ SvgImage avares://Tachylite/Assets/new-note-dark.svg }" />
+          <Image x:Key="PdfIcon" Source="{SvgImage avares://Tachylite/Assets/import-pdf-dark.svg}" />
+          <Image x:Key="NewFolderIcon" Source="{SvgImage avares://Tachylite/Assets/new-folder-dark.svg}" />
+          <Image x:Key="DieIcon" Source="{SvgImage avares://Tachylite/Assets/die-icon-dark.svg}" />
+          <Image x:Key="MenuIcon" Source="{SvgImage avares://Tachylite/Assets/menu-icon-dark.svg}" />
+          <Image x:Key="CloseFolderIcon" Source="{SvgImage avares://Tachylite/Assets/close-folder-dark.svg}" />
+          <Image x:Key="TemplateIcon" Source="{SvgImage avares://Tachylite/Assets/template-icon-dark.svg}" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
   </UserControl.Resources>
 
   <!-- Outermost grid that holds all of the stuff on the page -->
@@ -31,15 +54,15 @@
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="15*" MinWidth="190" />
         <ColumnDefinition Width="1" />
-        <ColumnDefinition Width="85*" MinWidth="190" />
+        <ColumnDefinition Width="85*" MinWidth="320" />
       </Grid.ColumnDefinitions>
 
       <!-- Top Controls -->
       <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Spacing="8" Grid.Column="0" Grid.Row="0">
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleCreateMarkdownDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-note-dark.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleImportPdfDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/import-pdf-dark.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleNewFolderDialog}"><Image Source="{SvgImage avares://Tachylite/Assets/new-folder-dark.svg}" /></Button>
-        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ShowDiceRoller}"><Image Source="{SvgImage avares://Tachylite/Assets/die-icon-dark.svg}" /></Button>
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleCreateMarkdownDialog}" Content="{DynamicResource MarkdownIcon}" />
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleImportPdfDialog}" Content="{DynamicResource PdfIcon}" />
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleNewFolderDialog}" Content="{DynamicResource NewFolderIcon}" />
+        <Button MaxHeight="40" MaxWidth="40" Command="{Binding ToggleDiceRollerDialog}" Content="{DynamicResource DieIcon}" />
       </StackPanel>
       <!-- FileTree -->
       <TreeView ItemsSource="{Binding FileTree}" Background="Transparent" Grid.Column="0" Grid.Row="1">
@@ -111,14 +134,10 @@
                   Margin="8,0,8,0"
                   Grid.Column="0" />
         </Viewbox>
-        <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Flyout="{StaticResource ControlFlyout}" Grid.Column="1">
-          <Image Source="{SvgImage avares://Tachylite/Assets/menu-icon-dark.svg}" />
-        </Button>
-        <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Command="{Binding CloseChest}" Grid.Column="2">
-          <Image Source="{SvgImage avares://Tachylite/Assets/close-folder-dark.svg}" />
-        </Button>
+        <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Flyout="{StaticResource ControlFlyout}" Grid.Column="1" Content="{DynamicResource MenuIcon}" />
+        <Button MaxHeight="40" MaxWidth="40" Margin="0,0,8,0" Command="{Binding CloseChest}" Grid.Column="2" Content="{DynamicResource CloseFolderIcon}" />
       </Grid>
-      <GridSplitter ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" Background="DarkGray" Width="1" CornerRadius="12" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" />
+      <GridSplitter ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" Background="{DynamicResource SystemAccentColor}" Width="1" CornerRadius="6" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" />
       
       <!-- Tabs -->
       <TabControl ItemsSource="{Binding Tabs}" 
@@ -128,91 +147,142 @@
                   Grid.Column="2"
                   Grid.Row="0"
                   Grid.RowSpan="3" />
+      <Grid Grid.Column="2"
+            Grid.Row="0"
+            Grid.RowSpan="3">
+        
+        <!-- Modals -->
+        <Border IsVisible="{Binding IsCreateMarkdownDialogVisible}" 
+                Margin="20" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <StackPanel Orientation="Vertical"  Spacing="8">
+            <TextBox Text="{Binding NewFileName}" PlaceholderText="Name for new file..." Classes.invalid="{Binding FileNameIsInvalid}" ></TextBox>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Name="newFilePath" Text="{Binding NewFilePath}" PlaceholderText="Path to put file in..." Classes.invalid="{Binding NewFilePathDoesNotExistInChest}" IsEnabled="{Binding NewFilePathIsEnabled}" ></TextBox>
+              <Button Content="Browse" Click="ButtonNewFile_Click" IsEnabled="{Binding NewFilePathIsEnabled}"/> 
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="8"
+                        HorizontalAlignment="Center">
+              <Button Content="Cancel" Command="{Binding ToggleCreateMarkdownDialog}" />
+              <Button Content="Create" Command="{Binding CreateMarkdownFile}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsImportPdfDialogVisible}"
+                Margin="20" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <StackPanel Orientation="Vertical" Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Name="sourcePdfPath" Text="{Binding ExistingPdfPath}" PlaceholderText="Path to PDF file..." Classes.invalid="{Binding PdfFilePathIsInvalid}" ></TextBox>
+              <Button Content="Browse" Click="ButtonImportPdfSource_Click" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBox Name="newPdfPath" Text="{Binding NewPdfPath}" PlaceholderText="Path put file in..." Classes.invalid="{Binding NewPdfPathDoesNotExistInChest}" IsEnabled="{Binding NewPdfPathIsEnabled}" ></TextBox>
+                <Button Content="Browse" Click="ButtonImportPdfDestination_Click" IsEnabled="{Binding NewPdfPathIsEnabled}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="8"
+                        HorizontalAlignment="Center">
+              <Button Content="Cancel" Command="{Binding ToggleImportPdfDialog}" />
+              <Button Content="Import" Command="{Binding ImportPdfFile}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsNewFolderDialogVisible}"
+                Margin="20" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <StackPanel Orientation="Vertical" Spacing="8">
+            <TextBox Text="{Binding NewFolderName}" PlaceholderText="Name for the new folder..." Classes.invalid="{Binding FolderNameIsInvalid}" ></TextBox>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Name="newFolderPath" Text="{Binding NewFolderPath}" PlaceholderText="Path put folder in..." Classes.invalid="{Binding NewFolderPathDoesNotExistInChest}" IsEnabled="{Binding NewFolderPathIsEnabled}"></TextBox>
+              <Button Content="Browse" Click="ButtonNewFolder_Click" IsEnabled="{Binding NewFolderPathIsEnabled}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="8"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Button Content="Cancel" Command="{Binding ToggleNewFolderDialog}" />
+              <Button Content="Create" Command="{Binding CreateFolder}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsRenameDialogVisible}"
+                Margin="20" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <StackPanel Orientation="Vertical" Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBox Name="renamePath" Text="{Binding RenamePath}" PlaceholderText="Path to renamed item..." Classes.invalid="{Binding RenamePathIsInvalid}" IsEnabled="{Binding RenameEntryIsEnabled}"></TextBox>
+              <Button Content="Browse" Click="ButtonRename_Click" IsEnabled="{Binding RenameEntryIsEnabled}"/>
+            </StackPanel>    
+            <TextBox Text="{Binding RenameNewName}" PlaceholderText="New name..." Classes.invalid="{Binding RenameDestinationPathIsInvalid}" ></TextBox>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="8"
+                        HorizontalAlignment="Center">
+              <Button Content="Cancel" Command="{Binding ToggleRenameDialog}" />
+              <Button Content="Rename" Command="{Binding Rename}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsNewTemplateDialogVisible}" 
+                Margin="20" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <StackPanel Orientation="Vertical" Spacing="8">
+            <TextBlock Margin="16" 
+                      Padding="16"
+                      TextWrapping="Wrap"
+                      FontSize="16"
+                      HorizontalAlignment="Center">
+              Templates allow you to save the current structure of a chest.
+              When you create a template all files and folders will be stored in a new template.
+              Then, when you go to create a new template, you can select the template you created and it will create the new chest with all the stuff this one currently has!
+                      </TextBlock>
+            <Label Target="templateTextBox" HorizontalAlignment="Center">Name for the new template:</Label>
+            <TextBox Name="templateTextBox" HorizontalAlignment="Center" Text="{Binding NewTemplateName}" PlaceholderText="Name for new template..." Classes.invalid="{Binding NewTemplateNameIsInvalid}" ></TextBox>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="8"
+                        HorizontalAlignment="Center">
+              <Button Content="Cancel" Command="{Binding ToggleTemplateDialog}" />
+              <Button Content="Create" Command="{Binding CreateTemplate}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border IsVisible="{Binding IsDiceRollerVisible}"
+                Margin="20" 
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Background="{DynamicResource SystemControlTransientBackgroundBrush}"
+                CornerRadius="12"
+                Padding="24">
+          <ScrollViewer>
+            <views:DiceRollerView DataContext="{Binding DiceRoller}"/>
+          </ScrollViewer>
+        </Border>
+      </Grid>
     </Grid>
-
-    <!-- Modals -->
-    <Border IsVisible="{Binding IsCreateMarkdownDialogVisible}" Margin="20" Background="Black">
-      <StackPanel Orientation="Vertical">
-        <TextBox Text="{Binding NewFileName}" PlaceholderText="Name for new file..." Classes.invalid="{Binding FileNameIsInvalid}" ></TextBox>
-        <TextBox Name="newFilePath" Text="{Binding NewFilePath}" PlaceholderText="Path to put file in..." Classes.invalid="{Binding NewFilePathDoesNotExistInChest}" IsEnabled="{Binding NewFilePathIsEnabled}" ></TextBox>
-        <Button Content="Browse" Click="ButtonNewFile_Click" IsEnabled="{Binding NewFilePathIsEnabled}"/>
-        <StackPanel Orientation="Horizontal" 
-                    Spacing="8"
-                    HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding ToggleCreateMarkdownDialog}" />
-          <Button Content="Create" Command="{Binding CreateMarkdownFile}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <Border IsVisible="{Binding IsImportPdfDialogVisible}" Margin="20" Background="Black">
-      <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-          <TextBox Name="sourcePdfPath" Text="{Binding ExistingPdfPath}" PlaceholderText="Path to PDF file..." Classes.invalid="{Binding PdfFilePathIsInvalid}" ></TextBox>
-          <Button Content="Browse" Click="ButtonImportPdfSource_Click" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <TextBox Name="newPdfPath" Text="{Binding NewPdfPath}" PlaceholderText="Path put file in..." Classes.invalid="{Binding NewPdfPathDoesNotExistInChest}" IsEnabled="{Binding NewPdfPathIsEnabled}" ></TextBox>
-            <Button Content="Browse" Click="ButtonImportPdfDestination_Click" IsEnabled="{Binding NewPdfPathIsEnabled}" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" 
-                    Spacing="8"
-                    HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding ToggleImportPdfDialog}" />
-          <Button Content="Import" Command="{Binding ImportPdfFile}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <Border IsVisible="{Binding IsNewFolderDialogVisible}" Margin="20" Background="Black">
-      <StackPanel Orientation="Vertical">
-        <TextBox Text="{Binding NewFolderName}" PlaceholderText="Name for the new folder..." Classes.invalid="{Binding FolderNameIsInvalid}" ></TextBox>
-        <StackPanel Orientation="Horizontal">
-          <TextBox Name="newFolderPath" Text="{Binding NewFolderPath}" PlaceholderText="Path put folder in..." Classes.invalid="{Binding NewFolderPathDoesNotExistInChest}" IsEnabled="{Binding NewFolderPathIsEnabled}"></TextBox>
-          <Button Content="Browse" Click="ButtonNewFolder_Click" IsEnabled="{Binding NewFolderPathIsEnabled}"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" 
-                    Spacing="8"
-                    HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding ToggleNewFolderDialog}" />
-          <Button Content="Create" Command="{Binding CreateFolder}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <Border IsVisible="{Binding IsRenameDialogVisible}" HorizontalAlignment="Stretch" Margin="20" Background="Black">
-      <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-          <TextBox Name="renamePath" Text="{Binding RenamePath}" PlaceholderText="Path to renamed item..." Classes.invalid="{Binding RenamePathIsInvalid}" IsEnabled="{Binding RenameEntryIsEnabled}"></TextBox>
-          <Button Content="Browse" Click="ButtonRename_Click" IsEnabled="{Binding RenameEntryIsEnabled}"/>
-        </StackPanel>    
-        <TextBox Text="{Binding RenameNewName}" PlaceholderText="New name..." Classes.invalid="{Binding RenameDestinationPathIsInvalid}" ></TextBox>
-        <StackPanel Orientation="Horizontal" 
-                    Spacing="8"
-                    HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding ToggleRenameDialog}" />
-          <Button Content="Rename" Command="{Binding Rename}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <Border IsVisible="{Binding IsNewTemplateVisible}" Margin="20" Background="Black">
-      <StackPanel Orientation="Vertical">    
-        <TextBox Text="{Binding NewTemplateName}" PlaceholderText="Name for new template..." Classes.invalid="{Binding NewTemplateNameIsInvalid}" ></TextBox>
-        <StackPanel Orientation="Horizontal" 
-                    Spacing="8"
-                    HorizontalAlignment="Center">
-          <Button Content="Cancel" Command="{Binding ToggleTemplateDialog}" />
-          <Button Content="Create" Command="{Binding CreateTemplate}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <Border IsVisible="{Binding DisplayDiceRoller}"
-            HorizontalAlignment="Right" 
-            VerticalAlignment="Bottom" 
-            Margin="0,0,20,20">
-      <views:DiceRollerView DataContext="{Binding DiceRoller}"/>
-    </Border>
   </Grid>
 </UserControl>

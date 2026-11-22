@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Tachylite.Core.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Tachylite.Views;
 using System.Text;
 
 namespace Tachylite.ViewModels;
@@ -64,20 +60,22 @@ public partial class DiceRollerViewModel : ViewModelBase
         if (DiceRollTextIsInvalidRoll) return;
 
         long[] results = _diceRollerService.RollDice(DiceRollText);
+        long total = _diceRollerService.SumOfRoll(results);
 
         StringBuilder resultText = new();
 
-        for (int i = 0; i < results.Length; i++)
+        if (results.Length < 10000)
         {
-            if (results.Length <= 1) break;
-            resultText.Append(results[i]);
-            if (i == results.Length - 1) resultText.Append(" = ");
-            else resultText.Append(" + ");
-        } 
-        resultText.Append($"{_diceRollerService.SumOfRoll(results)}");
+            for (int i = 0; i < results.Length; i++)
+            {
+                if (results.Length <= 1) break;
+                resultText.Append(results[i]);
+                if (i == results.Length - 1) resultText.Append(" = ");
+                else resultText.Append(" + ");
+            }
+        }
+        resultText.Append($"{total}");
 
         RollResultText = resultText.ToString();
-
-        OnPropertyChanged(nameof(RollResultText));
     }
 }
