@@ -12,4 +12,5 @@ public class PdfPageModel
     public required PdfPageBackgroundImageType BackgroundImageType { get; set; }
     public required PdfTextElementModel[] TextElements { get; set; }
     public required PdfImageElementModel[] ImageElements { get; set; }
+    public PdfFormFieldElementModel[]? FormFieldElements { get; set; }
 }
