@@ -4,7 +4,8 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:vm="using:Tachylite.ViewModels"
             xmlns:views="using:Tachylite.Views"
-            xmlns:local="using:Tachylite"
+            xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
+
             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
             x:Class="Tachylite.Views.MarkdownEditorView"
             x:DataType="vm:MarkdownEditorViewModel">
@@ -19,7 +20,16 @@
             </TextBox>
         </Panel>
         <Panel IsVisible="{Binding PreviewIsVisible}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
-            <NativeWebView Name="webView" local:NativeWebViewHtmlSource.HtmlSource="{Binding MarkdownHtml}"></NativeWebView>
+            <html:HtmlPanel Text="{Binding MarkdownHtml}"
+                            Background="Black"
+                            Padding="8">
+                <html:HtmlPanel.BaseStylesheet>
+                    * {
+                        color: white;
+                        font-family: Verdana, sans-serif;
+                    }
+                </html:HtmlPanel.BaseStylesheet>
+            </html:HtmlPanel>
         </Panel>
     </Grid>
 </UserControl>
