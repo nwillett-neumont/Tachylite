@@ -34,4 +34,10 @@ public interface IFileSystemService
     public FolderModel CreateFolderModel(string path, string folderName);
     public byte[] ReadPdfData(string pdfPath);
     public void WritePdfData(string pdfPath, byte[] pdfData);
+    public void CopyFile(string chestPath, string destinationPath, string filePath);
+    public void CopyFolder(string chestPath, string destinationPath, string folderPath);
+    public string GetPdfConfigurationFileName(string chestPath, string documentPath);
+    public string GetPdfConfigurationFilePath(string chestPath, string documentPath);
+    public PdfDocumentConfigurationModel CreatePdfConfigurationModel(string configFilePath);
+    public void SavePdfConfigurationFile(PdfDocumentConfigurationModel pdfConfigurationModel, string pdfConfigurationFilePath);
 }

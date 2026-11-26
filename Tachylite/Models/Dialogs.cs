@@ -7,5 +7,6 @@ public enum Dialogs
     ImportPdfDialog,
     NewFolderDialog,
     RenameDialog,
+    DuplicateDialog,
     TemplateDialog,
 }
