@@ -31,6 +31,6 @@ public class MarkdownService : IMarkdownService
 
     public string GetMarkdownHtml(string markdown)
     {
-        return AddStyle(Markdown.ToHtml(markdown, Pipeline));
+        return Markdown.ToHtml(markdown, Pipeline);
     }
 }
