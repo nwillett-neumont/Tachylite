@@ -43,6 +43,9 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool IsRenameDialogVisible { get; set; } = false;
 
     [ObservableProperty]
+    public partial bool IsDuplicateDialogVisible { get; set; } = false;
+
+    [ObservableProperty]
     public partial bool IsNewTemplateDialogVisible { get; set; } = false;
 
     [ObservableProperty]
@@ -71,6 +74,12 @@ public partial class EditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string RenamePath { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string DuplicateSourcePath { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string DuplicateDestinationPath { get; set; } = "";
 
     [ObservableProperty]
     public partial string NewTemplateName { get; set; } = "";
@@ -114,6 +123,8 @@ public partial class EditorViewModel : ViewModelBase
     public bool RenamePathIsInvalid => string.IsNullOrWhiteSpace(RenamePath) || 
         !(Path.Exists(RenamePath) || Path.Exists(Path.Combine(ChestPath, RenamePath)));
 
+    public bool DuplicateSourcePathIsInvalid => DuplicateSourcePathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, DuplicateSourcePath));
+
     public bool NewFilePathDoesNotExistInChest => NewFilePathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewFilePath));
 
     public bool NewPdfPathDoesNotExistInChest => PdfPathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, NewPdfPath));
@@ -123,6 +134,8 @@ public partial class EditorViewModel : ViewModelBase
         !(_validationService.ValidatePascalCase(Path.GetFileNameWithoutExtension(RenameNewName)) || 
         _validationService.ValidateSnakeCase(Path.GetFileNameWithoutExtension(RenameNewName))) ||
         File.Exists(Path.Combine(Path.GetDirectoryName(RenamePath)!, RenameNewName));
+
+    public bool DuplicateDestinationPathIsInvalid => DuplicateDestinationPathHasBeenAttempted && !Path.Exists(Path.Combine(ChestPath, DuplicateDestinationPath));
 
     public bool NewTemplateNameIsInvalid => NewTemplateNameHasBeenAttempted && 
         (string.IsNullOrWhiteSpace(NewTemplateName) ||
@@ -143,6 +156,10 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool NewFolderNameHasBeenAttempted { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DuplicateSourcePathIsInvalid))]
+    public partial bool DuplicateSourcePathHasBeenAttempted { get; set; } = false;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NewFilePathDoesNotExistInChest))]
     public partial bool NewFilePathHasBeenAttempted { get; set; } = false;
 
@@ -155,8 +172,13 @@ public partial class EditorViewModel : ViewModelBase
     public partial bool NewFolderPathHasBeenAttempted { get; set; } = false;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DuplicateDestinationPathIsInvalid))]
+    public partial bool DuplicateDestinationPathHasBeenAttempted { get; set; } = false;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NewTemplateNameIsInvalid))]
     public partial bool NewTemplateNameHasBeenAttempted { get; set; } = true; //false
+    
     [ObservableProperty]
     public partial bool NewFilePathIsEnabled { get; set; } = true;
 
@@ -168,6 +190,9 @@ public partial class EditorViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool RenameEntryIsEnabled { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool DuplicateDestinationIsEnabled { get; set; } = true;
 
     public void PopulateFileTree()
     {
@@ -191,6 +216,7 @@ public partial class EditorViewModel : ViewModelBase
                                             ToggleContextMenuRenameDialogCommand,
                                             ToggleContextMenuCreateMarkdownDialogCommand,
                                             ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuDuplicateDialogCommand,
                                             ToggleContextMenuNewFolderDialogCommand);
             FileTree.Add(BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files));
         }
@@ -219,6 +245,7 @@ public partial class EditorViewModel : ViewModelBase
                                             ToggleContextMenuRenameDialogCommand,
                                             ToggleContextMenuCreateMarkdownDialogCommand,
                                             ToggleContextMenuImportPdfDialogCommand,
+                                            ToggleContextMenuDuplicateDialogCommand,
                                             ToggleContextMenuNewFolderDialogCommand);
             folderNode.Children = BuildFolderTreeNode(folderPath, folderNode, folder.SubFolders, folder.Files).Children;
             node.Children.Add(folderNode);
@@ -246,6 +273,7 @@ public partial class EditorViewModel : ViewModelBase
         IsImportPdfDialogVisible = (exclude == Dialogs.ImportPdfDialog) && !IsImportPdfDialogVisible;
         IsNewFolderDialogVisible = (exclude == Dialogs.NewFolderDialog) && !IsNewFolderDialogVisible;
         IsRenameDialogVisible = (exclude == Dialogs.RenameDialog) && !IsRenameDialogVisible;
+        IsDuplicateDialogVisible = (exclude == Dialogs.DuplicateDialog) && !IsDuplicateDialogVisible;
         IsNewTemplateDialogVisible = (exclude == Dialogs.TemplateDialog) && !IsNewTemplateDialogVisible;
     }
 
@@ -426,6 +454,38 @@ public partial class EditorViewModel : ViewModelBase
         OnPropertyChanged(nameof(CurrentTab));
         OnPropertyChanged(nameof(Tabs));
 
+        PopulateFileTree();
+    }
+
+    [RelayCommand]
+    public void ToggleDuplicateDialog()
+    {
+        DuplicateDestinationIsEnabled = true;
+        HideDialogs(Dialogs.DuplicateDialog);
+
+        DuplicateSourcePath = DuplicateDestinationPath = "";
+    }
+
+    [RelayCommand]
+    public void ToggleContextMenuDuplicateDialog(string currentPath)
+    {
+        ToggleDuplicateDialog();
+        DuplicateDestinationIsEnabled = false;
+        DuplicateDestinationPath = Path.GetRelativePath(ChestPath, currentPath);
+    }
+
+    [RelayCommand]
+    public void Duplicate()
+    {
+        DuplicateSourcePathHasBeenAttempted = DuplicateDestinationPathHasBeenAttempted = true;
+        if (DuplicateSourcePathIsInvalid || DuplicateDestinationPathIsInvalid) return;
+
+        if (Directory.Exists(DuplicateSourcePath)) _fileSystemService.CopyFolder(ChestPath, Path.Combine(ChestPath, DuplicateDestinationPath), Path.Combine(ChestPath, DuplicateSourcePath));
+        else _fileSystemService.CopyFile(ChestPath, Path.Combine(ChestPath, DuplicateDestinationPath), Path.Combine(ChestPath, DuplicateSourcePath));
+
+        OnPropertyChanged(nameof(DuplicateSourcePathIsInvalid));
+        OnPropertyChanged(nameof(DuplicateDestinationPathIsInvalid));
+        IsDuplicateDialogVisible = false;
         PopulateFileTree();
     }
 
